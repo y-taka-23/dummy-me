@@ -1,0 +1,20 @@
+name:                dummy-me
+version:             0.1.0.0
+-- synopsis:
+-- description:
+homepage:            https://github.com/y-taka-23/dummy-me#readme
+license:             BSD3
+license-file:        LICENSE
+author:              TAKAHASHI Yuto
+maintainer:          ytaka23dev@gmail.com
+copyright:           2017 TAKAHASHI Yuto
+category:            Web
+build-type:          Simple
+extra-source-files:  README.md
+cabal-version:       >=1.10
+
+executable dummy-me
+  hs-source-dirs:      app
+  main-is:             Main.hs
+  default-language:    Haskell2010
+  build-depends:       base >= 4.7 && < 5

@@ -20,3 +20,4 @@ executable dummy-me
   build-depends:       base >= 4.7 && < 5
                      , Spock
                      , aeson
+                     , text

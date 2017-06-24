@@ -1,4 +1,3 @@
-{-# LANGUAGE OverloadedStrings #-}
 module Main where
 
 import           Control.Monad.IO.Class
@@ -32,7 +31,7 @@ routesOf = HM.keys
 getEndpointsOf :: DummyDB -> SpockCtxM ctx conn sess st ()
 getEndpointsOf db =
     let routes = routesOf db
-    in mapM_ (getEndpoint db) routes
+    in  mapM_ (getEndpoint db) routes
 
 getEndpoint :: DummyDB -> Route -> SpockCtxM ctx conn sess st ()
 getEndpoint db route = get (static $ T.unpack route) $ getAction db route

@@ -1,3 +1,4 @@
+{-# LANGUAGE OverloadedStrings #-}
 module Main where
 
 import           Control.Monad.IO.Class
@@ -5,6 +6,7 @@ import           Data.Aeson             hiding ( json )
 import qualified Data.ByteString.Lazy   as BS
 import qualified Data.HashMap.Lazy      as HM
 import qualified Data.Text              as T
+import qualified Data.Vector            as V
 import           Web.Spock
 import           Web.Spock.Config
 
@@ -36,11 +38,22 @@ getEndpointsOf db =
 getEndpoint :: DummyDB -> Route -> SpockCtxM ctx conn sess st ()
 getEndpoint db route = get (static $ T.unpack route) $ getAction db route
 
-select :: T.Text -> DummyDB -> Maybe Value
-select = HM.lookup
+selectAll :: DummyDB -> T.Text -> Maybe Value
+selectAll = flip HM.lookup
+
+selectById :: DummyDB -> T.Text -> Int -> Maybe Value
+selectById db table key =
+    case selectAll db table of
+        Just (Array records) -> V.find (idIs key) records
+        _ -> Nothing
+
+idIs :: Int -> Value -> Bool
+idIs key (Object obj) =
+    HM.lookup "id" obj == Just (Number (fromIntegral key))
+isId _ _ = False
 
 getAction :: (MonadIO m) => DummyDB -> T.Text -> ActionCtxT ctx m ()
 getAction db key =
-    case select key db of
+    case selectAll db key of
         Nothing -> error "unreachable code"
         Just val -> json val

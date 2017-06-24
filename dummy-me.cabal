@@ -21,3 +21,4 @@ executable dummy-me
                      , Spock
                      , aeson
                      , text
+                     , bytestring

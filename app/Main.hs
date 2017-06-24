@@ -3,7 +3,6 @@ module Main where
 import           Web.DummyMe.DB
 
 import           Control.Monad.IO.Class
-import qualified Data.HashMap.Lazy      as HM
 import qualified Data.Text              as T
 import           Web.Spock
 import           Web.Spock.Config
@@ -22,7 +21,7 @@ main = do
 type Route = T.Text
 
 routesOf :: DummyDB -> [Route]
-routesOf = HM.keys
+routesOf = topLevelKeys
 
 getEndpointsOf :: DummyDB -> SpockCtxM ctx conn sess st ()
 getEndpointsOf db =
@@ -34,6 +33,6 @@ getEndpoint db route = get (static $ T.unpack route) $ getAction db route
 
 getAction :: (MonadIO m) => DummyDB -> T.Text -> ActionCtxT ctx m ()
 getAction db key =
-    case selectAll db key of
+    case select db key of
         Nothing -> error "unreachable code"
         Just val -> json val

@@ -2,7 +2,8 @@
 module Web.DummyMe.DB (
       DummyDB(..)
     , loadDummyDB
-    , selectAll
+    , topLevelKeys
+    , select
     , selectById
     ) where
 
@@ -13,20 +14,24 @@ import qualified Data.Text              as T
 import qualified Data.Vector            as V
 
 type DummyDB = Object  -- HashMap Text Value
+type TopLevelKey = T.Text
 
 loadDummyDB :: FilePath -> IO (Either String DummyDB)
 loadDummyDB fp = eitherDecode' <$> BS.readFile fp
 
-selectAll :: DummyDB -> T.Text -> Maybe Value
-selectAll = flip HM.lookup
+topLevelKeys :: DummyDB -> [TopLevelKey]
+topLevelKeys = HM.keys
 
-selectById :: DummyDB -> T.Text -> Int -> Maybe Value
-selectById db table key =
-    case selectAll db table of
-        Just (Array records) -> V.find (idIs key) records
+select :: DummyDB -> TopLevelKey -> Maybe Value
+select = flip HM.lookup
+
+selectById :: DummyDB -> TopLevelKey -> Int -> Maybe Value
+selectById db key idNum =
+    case select db key of
+        Just (Array records) -> V.find (idIs idNum) records
         _ -> Nothing
 
 idIs :: Int -> Value -> Bool
-idIs key (Object obj) =
-    HM.lookup "id" obj == Just (Number (fromIntegral key))
+idIs idNum (Object obj) =
+    HM.lookup "id" obj == Just (Number (fromIntegral idNum))
 isId _ _ = False

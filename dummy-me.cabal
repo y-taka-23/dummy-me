@@ -22,3 +22,4 @@ executable dummy-me
                      , aeson
                      , text
                      , bytestring
+                     , unordered-containers

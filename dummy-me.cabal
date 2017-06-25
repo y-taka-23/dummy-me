@@ -31,5 +31,3 @@ executable dummy-me
   build-depends:       base >= 4.7 && < 5
                      , dummy-me
                      , Spock
-                     , text
-                     , unordered-containers

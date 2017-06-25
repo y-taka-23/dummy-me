@@ -1,9 +1,9 @@
+{-# LANGUAGE OverloadedStrings #-}
 module Main where
 
 import           Web.DummyMe.DB
 
 import           Control.Monad.IO.Class
-import qualified Data.Text              as T
 import           Web.Spock
 import           Web.Spock.Config
 
@@ -16,23 +16,24 @@ main = do
         Right dummyDB -> do
             spockCfg <- defaultSpockCfg () PCNoDatabase dummyDB
             runSpock 8080 $ spock spockCfg $ do
-                getState >>= getEndpointsOf
 
-type Route = T.Text
+                get var $ \key -> do
+                    db <- getState
+                    getAction db key
 
-routesOf :: DummyDB -> [Route]
-routesOf = topLevelKeys
+                get (var <//> var) $ \key id -> do
+                    db <- getState
+                    getByIdAction db key id
 
-getEndpointsOf :: DummyDB -> SpockCtxM ctx conn sess st ()
-getEndpointsOf db =
-    let routes = routesOf db
-    in  mapM_ (getEndpoint db) routes
-
-getEndpoint :: DummyDB -> Route -> SpockCtxM ctx conn sess st ()
-getEndpoint db route = get (static $ T.unpack route) $ getAction db route
-
-getAction :: (MonadIO m) => DummyDB -> T.Text -> ActionCtxT ctx m ()
+getAction :: (MonadIO m) => DummyDB -> TopLevelKey -> ActionCtxT ctx m ()
 getAction db key =
     case select db key of
+        Nothing -> error "unreachable code"
+        Just val -> json val
+
+getByIdAction :: (MonadIO m) => DummyDB -> TopLevelKey -> Int
+              -> ActionCtxT ctx m ()
+getByIdAction db key id =
+    case selectById db key id of
         Nothing -> error "unreachable code"
         Just val -> json val

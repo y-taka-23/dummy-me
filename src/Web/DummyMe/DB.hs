@@ -1,8 +1,8 @@
 {-# LANGUAGE OverloadedStrings #-}
 module Web.DummyMe.DB (
       DummyDB(..)
+    , TopLevelKey(..)
     , loadDummyDB
-    , topLevelKeys
     , select
     , selectById
     ) where
@@ -18,9 +18,6 @@ type TopLevelKey = T.Text
 
 loadDummyDB :: FilePath -> IO (Either String DummyDB)
 loadDummyDB fp = eitherDecode' <$> BS.readFile fp
-
-topLevelKeys :: DummyDB -> [TopLevelKey]
-topLevelKeys = HM.keys
 
 select :: DummyDB -> TopLevelKey -> Maybe Value
 select = flip HM.lookup

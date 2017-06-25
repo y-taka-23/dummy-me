@@ -1,4 +1,6 @@
 {-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE GADTs #-}
+{-# LANGUAGE FlexibleContexts #-}
 module Main where
 
 import           Web.DummyMe.DB
@@ -21,25 +23,19 @@ main = do
             spockCfg <- defaultSpockCfg () PCNoDatabase (InMemoryDB dbRef)
             runSpock 8080 $ spock spockCfg $ do
 
-                get var $ \key -> do
-                    (InMemoryDB dbRef) <- getState
-                    db <- liftIO $ readIORef dbRef
-                    getAction db key
+                get var $ \key -> getAction key
+                get (var <//> var) $ \key id -> getByIdAction key id
 
-                get (var <//> var) $ \key id -> do
-                    (InMemoryDB dbRef) <- getState
-                    db <- liftIO $ readIORef dbRef
-                    getByIdAction db key id
-
-getAction :: (MonadIO m) => DummyDB -> TopLevelKey -> ActionCtxT ctx m ()
-getAction db key =
+getAction key = do
+    (InMemoryDB dbRef) <- getState
+    db <- liftIO $ readIORef dbRef
     case select db key of
         Nothing -> error "unreachable code"
         Just val -> json val
 
-getByIdAction :: (MonadIO m) => DummyDB -> TopLevelKey -> Int
-              -> ActionCtxT ctx m ()
-getByIdAction db key id =
+getByIdAction key id = do
+    (InMemoryDB dbRef) <- getState
+    db <- liftIO $ readIORef dbRef
     case selectById db key id of
         Nothing -> error "unreachable code"
         Just val -> json val

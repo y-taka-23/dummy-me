@@ -4,8 +4,11 @@ module Main where
 import           Web.DummyMe.DB
 
 import           Control.Monad.IO.Class
+import           Data.IORef
 import           Web.Spock
 import           Web.Spock.Config
+
+data InMemoryDB = InMemoryDB (IORef DummyDB)
 
 main :: IO ()
 main = do
@@ -14,15 +17,18 @@ main = do
         Left message -> do
             putStrLn message
         Right dummyDB -> do
-            spockCfg <- defaultSpockCfg () PCNoDatabase dummyDB
+            dbRef <- newIORef dummyDB
+            spockCfg <- defaultSpockCfg () PCNoDatabase (InMemoryDB dbRef)
             runSpock 8080 $ spock spockCfg $ do
 
                 get var $ \key -> do
-                    db <- getState
+                    (InMemoryDB dbRef) <- getState
+                    db <- liftIO $ readIORef dbRef
                     getAction db key
 
                 get (var <//> var) $ \key id -> do
-                    db <- getState
+                    (InMemoryDB dbRef) <- getState
+                    db <- liftIO $ readIORef dbRef
                     getByIdAction db key id
 
 getAction :: (MonadIO m) => DummyDB -> TopLevelKey -> ActionCtxT ctx m ()

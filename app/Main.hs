@@ -29,13 +29,13 @@ main = do
 getAction key = do
     (InMemoryDB dbRef) <- getState
     db <- liftIO $ readIORef dbRef
-    case select db key of
-        Nothing -> error "unreachable code"
-        Just val -> json val
+    case select key db of
+        (_, Nothing) -> error "unreachable code"
+        (_, Just val) -> json val
 
 getByIdAction key id = do
     (InMemoryDB dbRef) <- getState
     db <- liftIO $ readIORef dbRef
-    case selectById db key id of
-        Nothing -> error "unreachable code"
-        Just val -> json val
+    case selectById key id db of
+        (_, Nothing) -> error "unreachable code"
+        (_, Just val) -> json val

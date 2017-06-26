@@ -19,14 +19,14 @@ type TopLevelKey = T.Text
 loadDummyDB :: FilePath -> IO (Either String DummyDB)
 loadDummyDB fp = eitherDecode' <$> BS.readFile fp
 
-select :: DummyDB -> TopLevelKey -> Maybe Value
-select = flip HM.lookup
+select :: TopLevelKey -> DummyDB -> (DummyDB, Maybe Value)
+select key db = (db, HM.lookup key db)
 
-selectById :: DummyDB -> TopLevelKey -> Int -> Maybe Value
-selectById db key idNum =
-    case select db key of
-        Just (Array records) -> V.find (idIs idNum) records
-        _ -> Nothing
+selectById :: TopLevelKey -> Int -> DummyDB -> (DummyDB, Maybe Value)
+selectById key id db =
+    case select key db of
+        (_, Just (Array records)) -> (db, V.find (idIs id) records)
+        (_, _) -> (db, Nothing)
 
 idIs :: Int -> Value -> Bool
 idIs idNum (Object obj) =

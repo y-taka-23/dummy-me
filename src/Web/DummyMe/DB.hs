@@ -31,4 +31,4 @@ selectById db key idNum =
 idIs :: Int -> Value -> Bool
 idIs idNum (Object obj) =
     HM.lookup "id" obj == Just (Number (fromIntegral idNum))
-isId _ _ = False
+idIs _ _ = False

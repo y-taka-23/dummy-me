@@ -14,17 +14,13 @@ data InMemoryDB = InMemoryDB (IORef DummyDB)
 
 main :: IO ()
 main = do
-    eDummyDB <- loadDummyDB "db.json"
-    case eDummyDB of
-        Left message -> do
-            putStrLn message
-        Right dummyDB -> do
-            dbRef <- newIORef dummyDB
-            spockCfg <- defaultSpockCfg () PCNoDatabase (InMemoryDB dbRef)
-            runSpock 8080 $ spock spockCfg $ do
+    dummyDB <- loadDummyDB "db.json"
+    dbRef <- newIORef dummyDB
+    spockCfg <- defaultSpockCfg () PCNoDatabase (InMemoryDB dbRef)
+    runSpock 8080 $ spock spockCfg $ do
 
-                get var $ \key -> getAction key
-                get (var <//> var) $ \key id -> getByIdAction key id
+        get var $ \key -> getAction key
+        get (var <//> var) $ \key id -> getByIdAction key id
 
 getAction key = do
     (InMemoryDB dbRef) <- getState

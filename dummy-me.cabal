@@ -21,7 +21,6 @@ library
                      , text
                      , vector
                      , aeson
-                     , bytestring
                      , unordered-containers
 
 executable dummy-me

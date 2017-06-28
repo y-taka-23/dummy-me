@@ -19,9 +19,9 @@ library
   exposed-modules:     Web.DummyMe.DB
   build-depends:       base >= 4.7 && < 5
                      , text
-                     , vector
                      , aeson
-                     , unordered-containers
+                     , lens
+                     , lens-aeson
 
 executable dummy-me
   hs-source-dirs:      app

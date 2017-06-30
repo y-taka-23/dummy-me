@@ -29,3 +29,18 @@ spec = do
         context "when the given key has no entry" $ do
             it "should return Nothing" $ do
                 select "other" db `shouldBe` (db, Nothing)
+
+    describe "selectById" $ do
+        context "when the given key has an entry of the given id" $ do
+            it "should return the single specified entry" $ do
+                selectById "users" 1 db `shouldBe` (db, Just alice)
+                selectById "users" 2 db `shouldBe` (db, Just bob)
+        context "when the given key has no entry of the given id" $ do
+            it "should return Nothing" $ do
+                selectById "users" 3 db `shouldBe` (db, Nothing)
+        context "when the given key has a non-array entry" $ do
+            it "should return Nothing" $ do
+                selectById "status" 1 db `shouldBe` (db, Nothing)
+        context "when the given key has no entry" $ do
+            it "should return Nothing" $ do
+                selectById "other" 1 db `shouldBe` (db, Nothing)

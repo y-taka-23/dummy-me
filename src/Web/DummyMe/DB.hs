@@ -6,6 +6,7 @@ module Web.DummyMe.DB (
     , loadDummyDB
     , select
     , selectById
+    , deleteById
     ) where
 
 import           Control.Lens
@@ -26,6 +27,17 @@ select x db = (db, db ^? key x)
 
 selectById :: TopLevelKey -> EntityId -> DummyDB -> (DummyDB, Maybe Value)
 selectById x n db = (db, db ^? key x . _Array . traverse . filtered (idIs n))
+
+deleteById :: TopLevelKey -> EntityId -> DummyDB -> (DummyDB, Maybe Value)
+deleteById x n db =
+    let (_, mDeletedEntity) = selectById x n db
+    in  (db & key x %~ purgeEntity n, mDeletedEntity)
+
+purgeEntity :: EntityId -> Value -> Value
+purgeEntity n val =
+    case val ^? _Array . traverse . filtered (not . idIs n) of
+        Just newVal -> newVal
+        Nothing     -> val
 
 idIs :: EntityId -> Value -> Bool
 idIs n val = val ^? key "id" . _Integer == Just n

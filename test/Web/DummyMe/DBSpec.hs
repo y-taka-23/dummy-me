@@ -15,6 +15,10 @@ alice, bob :: Value
 alice = Object $ HM.fromList [ ("id", Number 1), ("name", String "Alice") ]
 bob   = Object $ HM.fromList [ ("id", Number 2), ("name", String "Bob") ]
 
+delAliceDB, delBobDB :: DummyDB
+delAliceDB = "{ \"users\": [ { \"id\": 2, \"name\": \"Bob\" } ], \"status\": \"test\" }"
+delBobDB   = "{ \"users\": [ { \"id\": 1, \"name\": \"Alice\" } ], \"status\": \"test\" }"
+
 spec :: Spec
 spec = do
 
@@ -44,3 +48,18 @@ spec = do
         context "when the given key has no entry" $ do
             it "should return Nothing" $ do
                 selectById "other" 1 db `shouldBe` (db, Nothing)
+
+    describe "deleteById" $ do
+        context "when the given key has an entry of the given id" $ do
+            it "should return a pair of the new DB and the deleted entry" $ do
+                deleteById "users" 1 db `shouldBe` (delAliceDB, Just alice)
+                deleteById "users" 2 db `shouldBe` (delBobDB, Just bob)
+        context "when the give key has no entry of the given id" $ do
+            it "should return a pair of the original DB and Nothing" $ do
+                deleteById "users" 3 db `shouldBe` (db, Nothing)
+        context "when the given key has a non-array entry" $ do
+            it "should return a pair of the original DB and Nothing" $ do
+                deleteById "status" 1 db `shouldBe` (db, Nothing)
+        context "when the given key has no entry" $ do
+            it "should return a pair of the original DB and Nothing" $ do
+                deleteById "other" 1 db `shouldBe` (db, Nothing)

@@ -25,7 +25,7 @@ select :: TopLevelKey -> DummyDB -> (DummyDB, Maybe Value)
 select x db = (db, db ^? key x)
 
 selectById :: TopLevelKey -> EntityId -> DummyDB -> (DummyDB, Maybe Value)
-selectById x n db = (db, db ^? key x ^.. folded . filtered (idIs n) ^? ix 0)
+selectById x n db = (db, db ^? key x . _Array . traverse . filtered (idIs n))
 
 idIs :: EntityId -> Value -> Bool
 idIs n val = val ^? key "id" . _Integer == Just n

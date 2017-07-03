@@ -15,6 +15,7 @@ import           Data.Aeson.Lens
 import qualified Data.ByteString.Lazy   as BS
 import qualified Data.Text              as T
 import qualified Data.Text.IO           as TIO
+import qualified Data.Vector            as V
 
 newtype DummyDB = DummyDB BS.ByteString deriving ( Show )
 type TopLevelKey = T.Text
@@ -30,6 +31,7 @@ loadDummyDB fp = DummyDB <$> BS.readFile fp
 select :: TopLevelKey -> DummyDB -> (DummyDB, Maybe Value)
 select x (DummyDB db) = (DummyDB db, db ^? key x)
 
+-- TODO: It doen't go when there are multiple entities of the specified id
 selectById :: TopLevelKey -> EntityId -> DummyDB -> (DummyDB, Maybe Value)
 selectById x n (DummyDB db) =
     (DummyDB db, db ^? key x . _Array . traverse . filtered (idIs n))
@@ -37,13 +39,10 @@ selectById x n (DummyDB db) =
 deleteById :: TopLevelKey -> EntityId -> DummyDB -> (DummyDB, Maybe Value)
 deleteById x n (DummyDB db) =
     let (_, mDeletedEntity) = selectById x n (DummyDB db)
-    in  (DummyDB $ db & key x %~ purgeEntity n, mDeletedEntity)
+    in  (DummyDB $ db & key x . _Array %~ purgeEntity n, mDeletedEntity)
 
-purgeEntity :: EntityId -> Value -> Value
-purgeEntity n val =
-    case val ^? _Array . traverse . filtered (not . idIs n) of
-        Just newVal -> newVal
-        Nothing     -> val
+purgeEntity :: EntityId -> V.Vector Value -> V.Vector Value
+purgeEntity n = V.filter (not . idIs n)
 
 idIs :: EntityId -> Value -> Bool
 idIs n val = val ^? key "id" . _Integer == Just n

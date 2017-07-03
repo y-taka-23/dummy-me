@@ -23,6 +23,7 @@ library
                      , lens
                      , lens-aeson
                      , bytestring
+                     , vector
 
 executable dummy-me
   hs-source-dirs:      app

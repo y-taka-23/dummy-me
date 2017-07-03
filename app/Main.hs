@@ -35,3 +35,10 @@ getByIdAction key id = do
     case selectById key id db of
         (_, Nothing) -> error "unreachable code"
         (_, Just val) -> json val
+
+deleteByIdAction key id = do
+    (InMemoryDB dbRef) <- getState
+    db <- liftIO $ readIORef dbRef
+    case deleteById key id db of
+        (_, Nothing) -> error "unreachable code"
+        (_, Just _) -> error "unreachable code"

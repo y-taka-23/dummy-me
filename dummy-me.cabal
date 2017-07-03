@@ -22,6 +22,7 @@ library
                      , aeson
                      , lens
                      , lens-aeson
+                     , bytestring
 
 executable dummy-me
   hs-source-dirs:      app

@@ -9,15 +9,15 @@ import qualified Data.HashMap.Lazy as HM
 import qualified Data.Vector       as V
 
 db :: DummyDB
-db = "{ \"users\": [ { \"id\": 1, \"name\": \"Alice\" }, { \"id\": 2, \"name\": \"Bob\" } ], \"status\": \"test\" }"
+db = DummyDB "{ \"users\": [ { \"id\": 1, \"name\": \"Alice\" }, { \"id\": 2, \"name\": \"Bob\" } ], \"status\": \"test\" }"
 
 alice, bob :: Value
 alice = Object $ HM.fromList [ ("id", Number 1), ("name", String "Alice") ]
 bob   = Object $ HM.fromList [ ("id", Number 2), ("name", String "Bob") ]
 
 delAliceDB, delBobDB :: DummyDB
-delAliceDB = "{ \"users\": [ { \"id\": 2, \"name\": \"Bob\" } ], \"status\": \"test\" }"
-delBobDB   = "{ \"users\": [ { \"id\": 1, \"name\": \"Alice\" } ], \"status\": \"test\" }"
+delAliceDB = DummyDB "{ \"users\": [ { \"id\": 2, \"name\": \"Bob\" } ], \"status\": \"test\" }"
+delBobDB   = DummyDB "{ \"users\": [ { \"id\": 1, \"name\": \"Alice\" } ], \"status\": \"test\" }"
 
 spec :: Spec
 spec = do

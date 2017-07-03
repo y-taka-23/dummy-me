@@ -12,26 +12,32 @@ module Web.DummyMe.DB (
 import           Control.Lens
 import           Data.Aeson
 import           Data.Aeson.Lens
+import qualified Data.ByteString.Lazy   as BS
 import qualified Data.Text              as T
 import qualified Data.Text.IO           as TIO
 
-type DummyDB = T.Text
+newtype DummyDB = DummyDB BS.ByteString deriving ( Show )
 type TopLevelKey = T.Text
 type EntityId = Integer
 
+instance Eq DummyDB where
+    (==) (DummyDB x) (DummyDB y) =
+        (decode x :: Maybe Value) == (decode y :: Maybe Value)
+
 loadDummyDB :: FilePath -> IO DummyDB
-loadDummyDB = TIO.readFile
+loadDummyDB fp = DummyDB <$> BS.readFile fp
 
 select :: TopLevelKey -> DummyDB -> (DummyDB, Maybe Value)
-select x db = (db, db ^? key x)
+select x (DummyDB db) = (DummyDB db, db ^? key x)
 
 selectById :: TopLevelKey -> EntityId -> DummyDB -> (DummyDB, Maybe Value)
-selectById x n db = (db, db ^? key x . _Array . traverse . filtered (idIs n))
+selectById x n (DummyDB db) =
+    (DummyDB db, db ^? key x . _Array . traverse . filtered (idIs n))
 
 deleteById :: TopLevelKey -> EntityId -> DummyDB -> (DummyDB, Maybe Value)
-deleteById x n db =
-    let (_, mDeletedEntity) = selectById x n db
-    in  (db & key x %~ purgeEntity n, mDeletedEntity)
+deleteById x n (DummyDB db) =
+    let (_, mDeletedEntity) = selectById x n (DummyDB db)
+    in  (DummyDB $ db & key x %~ purgeEntity n, mDeletedEntity)
 
 purgeEntity :: EntityId -> Value -> Value
 purgeEntity n val =

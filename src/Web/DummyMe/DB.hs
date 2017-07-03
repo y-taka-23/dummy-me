@@ -1,4 +1,3 @@
-{-# LANGUAGE OverloadedStrings #-}
 module Web.DummyMe.DB (
       DummyDB(..)
     , TopLevelKey(..)
@@ -14,7 +13,6 @@ import           Data.Aeson
 import           Data.Aeson.Lens
 import qualified Data.ByteString.Lazy   as BS
 import qualified Data.Text              as T
-import qualified Data.Text.IO           as TIO
 import qualified Data.Vector            as V
 
 newtype DummyDB = DummyDB BS.ByteString deriving ( Show )
@@ -45,4 +43,4 @@ purgeEntity :: EntityId -> V.Vector Value -> V.Vector Value
 purgeEntity n = V.filter (not . idIs n)
 
 idIs :: EntityId -> Value -> Bool
-idIs n val = val ^? key "id" . _Integer == Just n
+idIs n val = val ^? key (T.pack "id") . _Integer == Just n

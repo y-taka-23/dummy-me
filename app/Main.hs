@@ -22,6 +22,8 @@ main = do
         get var $ \key -> getAction key
         get (var <//> var) $ \key id -> getByIdAction key id
 
+        delete (var <//> var) $ \key id -> deleteByIdAction key id
+
 getAction key = do
     (InMemoryDB dbRef) <- getState
     db <- liftIO $ readIORef dbRef
@@ -38,7 +40,7 @@ getByIdAction key id = do
 
 deleteByIdAction key id = do
     (InMemoryDB dbRef) <- getState
-    db <- liftIO $ readIORef dbRef
-    case deleteById key id db of
-        (_, Nothing) -> error "unreachable code"
-        (_, Just _) -> error "unreachable code"
+    mDeleted <- liftIO $ atomicModifyIORef' dbRef (deleteById key id)
+    case mDeleted of
+        Nothing -> error "unreachable code"
+        Just _ -> error "unreachable code"

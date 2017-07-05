@@ -6,6 +6,7 @@ module Web.DummyMe.DB (
     , select
     , selectById
     , deleteById
+    , insert
     ) where
 
 import           Control.Lens

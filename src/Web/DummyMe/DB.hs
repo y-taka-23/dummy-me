@@ -42,5 +42,17 @@ deleteById x n (DummyDB db) =
 purgeEntity :: EntityId -> V.Vector Value -> V.Vector Value
 purgeEntity n = V.filter (not . idIs n)
 
+insert :: TopLevelKey -> Value -> DummyDB -> (DummyDB, Maybe Value)
+insert key val (DummyDB db) = undefined
+
+appendEntity :: Value -> V.Vector Value -> V.Vector Value
+appendEntity val currents = undefined
+
+setId :: EntityId -> Object -> Object
+setId n obj = undefined
+
+nextId :: V.Vector Value -> EntityId
+nextId currents = undefined
+
 idIs :: EntityId -> Value -> Bool
 idIs n val = val ^? key (T.pack "id") . _Integer == Just n

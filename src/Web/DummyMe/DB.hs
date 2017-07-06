@@ -13,6 +13,8 @@ import           Control.Lens
 import           Data.Aeson
 import           Data.Aeson.Lens
 import qualified Data.ByteString.Lazy   as BS
+import qualified Data.HashMap.Lazy      as HM
+import qualified Data.Scientific        as SCI
 import qualified Data.Text              as T
 import qualified Data.Vector            as V
 

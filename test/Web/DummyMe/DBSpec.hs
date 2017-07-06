@@ -28,6 +28,13 @@ carolWithoutId = Object $ HM.fromList [ ("name", String "Carol") ]
 insCarolDB :: DummyDB
 insCarolDB = DummyDB "{ \"users\": [ { \"id\": 1, \"name\": \"Alice\" }, { \"id\": 2, \"name\": \"Bob\" }, { \"id\": 3, \"name\": \"Carol\" } ], \"status\": \"test\" }"
 
+statusString, statusObject :: Value
+statusString = String "running"
+statusObject = Object $ HM.fromList [ ("prev", String "started"), ("next", String "stopped") ]
+
+updStatusStringDB = DummyDB "{ \"users\": [ { \"id\": 1, \"name\": \"Alice\" }, { \"id\": 2, \"name\": \"Bob\" } ], \"status\": \"running\" }"
+updStatusObjectDB = DummyDB "{ \"users\": [ { \"id\": 1, \"name\": \"Alice\" }, { \"id\": 2, \"name\": \"Bob\" } ], \"status\": { \"prev\": \"started\", \"next\": \"stopped\" } }"
+
 spec :: Spec
 spec = do
 
@@ -92,3 +99,20 @@ spec = do
         context "when the given key has no entry" $ do
             it "should return a pair of the original DB and Nothing" $ do
                 insert "other" carol db `shouldBe` (db, Nothing)
+
+    describe "update" $ do
+        context "when the given key has a non-array entry" $ do
+            it "should replace the entry and return the new entry" $ do
+                let (newDB, Just entry) = update "status" statusString db
+                newDB `shouldBe` updStatusStringDB
+                entry `shouldBe` statusString
+            it "should replace the entry and return the new entry" $ do
+                let (newDB, Just entry) = update "status" statusObject db
+                newDB `shouldBe` updStatusObjectDB
+                entry `shouldBe` statusObject
+        context "when the given key has an array of entries" $ do
+            it "should do nothing and return the original DB" $ do
+                update "users" statusString db `shouldBe` (db, Nothing)
+        context "when the given key has no entry" $ do
+            it "should do nothing and return the original DB" $ do
+                update "other" statusString db `shouldBe` (db, Nothing)

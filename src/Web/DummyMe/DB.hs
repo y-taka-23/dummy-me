@@ -7,6 +7,7 @@ module Web.DummyMe.DB (
     , selectById
     , deleteById
     , insert
+    , update
     ) where
 
 import           Control.Lens
@@ -68,6 +69,9 @@ nextId currents =
         Just sci -> case SCI.floatingOrInteger sci of
             Left _  -> 1
             Right n -> n + 1
+
+update :: TopLevelKey -> Value -> DummyDB -> (DummyDB, Maybe Value)
+update = undefined
 
 idIs :: EntityId -> Value -> Bool
 idIs n val = val ^? key (T.pack "id") . _Integer == Just n

@@ -24,6 +24,8 @@ library
                      , lens-aeson
                      , bytestring
                      , vector
+                     , unordered-containers
+                     , scientific
 
 executable dummy-me
   hs-source-dirs:      app

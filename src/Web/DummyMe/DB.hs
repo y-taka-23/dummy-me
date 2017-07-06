@@ -44,16 +44,28 @@ purgeEntity :: EntityId -> V.Vector Value -> V.Vector Value
 purgeEntity n = V.filter (not . idIs n)
 
 insert :: TopLevelKey -> Value -> DummyDB -> (DummyDB, Maybe Value)
-insert key val (DummyDB db) = undefined
+insert x val (DummyDB db) =
+    case nextId <$> db ^? key x . _Array of
+        Nothing -> (DummyDB db, Nothing)
+        Just newId ->
+            let newVal = val & _Object %~ setId newId
+            in  ( DummyDB $ db & key x . _Array %~ appendEntity newVal
+                , Just newVal
+                )
 
 appendEntity :: Value -> V.Vector Value -> V.Vector Value
-appendEntity val currents = undefined
+appendEntity = flip V.snoc
 
 setId :: EntityId -> Object -> Object
-setId n obj = undefined
+setId n = HM.insert (T.pack "id") (toJSON n)
 
 nextId :: V.Vector Value -> EntityId
-nextId currents = undefined
+nextId currents =
+    case maximumOf (traverse . key (T.pack "id") . _Number) currents of
+        Nothing -> 1
+        Just sci -> case SCI.floatingOrInteger sci of
+            Left _  -> 1
+            Right n -> n + 1
 
 idIs :: EntityId -> Value -> Bool
 idIs n val = val ^? key (T.pack "id") . _Integer == Just n

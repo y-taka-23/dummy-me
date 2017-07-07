@@ -24,6 +24,8 @@ main = do
 
         delete (var <//> var) $ \key id -> deleteByIdAction key id
 
+        post var $ \key -> postAction key
+
 getAction key = do
     (InMemoryDB dbRef) <- getState
     db <- liftIO $ readIORef dbRef
@@ -42,5 +44,13 @@ deleteByIdAction key id = do
     (InMemoryDB dbRef) <- getState
     mDeleted <- liftIO $ atomicModifyIORef' dbRef (deleteById key id)
     case mDeleted of
+        Nothing -> error "unreachable code"
+        Just _ -> error "unreachable code"
+
+postAction key = do
+    entry <- jsonBody' -- returns 400 on parsing error
+    (InMemoryDB dbRef) <- getState
+    mInserted <- liftIO $ atomicModifyIORef' dbRef (insert key entry)
+    case mInserted of
         Nothing -> error "unreachable code"
         Just _ -> error "unreachable code"

@@ -71,7 +71,15 @@ nextId currents =
             Right n -> n + 1
 
 update :: TopLevelKey -> Value -> DummyDB -> (DummyDB, Maybe Value)
-update = undefined
+update x val (DummyDB db)
+    | isSingular x (DummyDB db) = (DummyDB $ db & key x .~ val, Just val)
+    | otherwise                 = (DummyDB db, Nothing)
+
+isSingular :: TopLevelKey -> DummyDB -> Bool
+isSingular x (DummyDB db) = case db ^? key x of
+    Just (Array _) -> False
+    Just _         -> True
+    Nothing        -> False
 
 idIs :: EntityId -> Value -> Bool
 idIs n val = val ^? key (T.pack "id") . _Integer == Just n

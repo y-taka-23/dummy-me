@@ -35,6 +35,10 @@ statusObject = Object $ HM.fromList [ ("prev", String "started"), ("next", Strin
 updStatusStringDB = DummyDB "{ \"users\": [ { \"id\": 1, \"name\": \"Alice\" }, { \"id\": 2, \"name\": \"Bob\" } ], \"status\": \"running\" }"
 updStatusObjectDB = DummyDB "{ \"users\": [ { \"id\": 1, \"name\": \"Alice\" }, { \"id\": 2, \"name\": \"Bob\" } ], \"status\": { \"prev\": \"started\", \"next\": \"stopped\" } }"
 
+updAliceDB, updBobDB :: DummyDB
+updAliceDB = DummyDB "{ \"users\": [ { \"id\": 1, \"name\": \"Carol\" }, { \"id\": 2, \"name\": \"Bob\" } ], \"status\": \"test\" }"
+updBobDB   = DummyDB "{ \"users\": [ { \"id\": 1, \"name\": \"Alice\" }, { \"id\": 2, \"name\": \"Carol\" } ], \"status\": \"test\" }"
+
 spec :: Spec
 spec = do
 
@@ -116,3 +120,33 @@ spec = do
         context "when the given key has no entry" $ do
             it "should do nothing and return the original DB" $ do
                 update "other" statusString db `shouldBe` (db, Nothing)
+
+    describe "updateById" $ do
+        context "even when the given entry has the 'id' field" $ do
+            it "should ignore the original id of the entry" $ do
+                let (newDB, Just entry) = updateById "users" 1 carol db
+                newDB `shouldBe` updAliceDB
+                entry ^? key "id" . _Number `shouldBe` Just 1
+                entry ^? key "name" `shouldBe` carol ^? key "name"
+            it "should ignore the original id of the entry" $ do
+                let (newDB, Just entry) = updateById "users" 2 carol db
+                newDB `shouldBe` updBobDB
+                entry ^? key "id" . _Number `shouldBe` Just 2
+                entry ^? key "name" `shouldBe` carol ^? key "name"
+        context "when the given entry doesn't have the 'id' key" $ do
+            it "should update the entry by the specified id" $ do
+                let (newDB, Just entry) = updateById "users" 1 carolWithoutId db
+                newDB `shouldBe` updAliceDB
+                entry ^? key "id" . _Number `shouldBe` Just 1
+                entry ^? key "name" `shouldBe` carol ^? key "name"
+            it "should update the entry by the specified id" $ do
+                let (newDB, Just entry) = updateById "users" 2 carolWithoutId db
+                newDB `shouldBe` updAliceDB
+                entry ^? key "id" . _Number `shouldBe` Just 2
+                entry ^? key "name" `shouldBe` carol ^? key "name"
+        context "when the given key has a non-array entry" $ do
+            it "should do nothing and return the original DB" $ do
+                updateById "status" 1 statusString db `shouldBe` (db, Nothing)
+        context "when the given key has no entry" $ do
+            it "should do nothing and return the original DB" $ do
+                updateById "other" 1 statusString db `shouldBe` (db, Nothing)

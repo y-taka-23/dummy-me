@@ -8,6 +8,7 @@ module Web.DummyMe.DB (
     , deleteById
     , insert
     , update
+    , updateById
     ) where
 
 import           Control.Lens
@@ -80,6 +81,10 @@ isSingular x (DummyDB db) = case db ^? key x of
     Just (Array _) -> False
     Just _         -> True
     Nothing        -> False
+
+updateById :: TopLevelKey -> EntityId -> Value -> DummyDB
+           -> (DummyDB, Maybe Value)
+updateById = undefined
 
 idIs :: EntityId -> Value -> Bool
 idIs n val = val ^? key (T.pack "id") . _Integer == Just n

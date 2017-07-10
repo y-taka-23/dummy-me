@@ -85,15 +85,17 @@ isSingular x (DummyDB db) = case db ^? key x of
 updateById :: TopLevelKey -> EntityId -> Value -> DummyDB
            -> (DummyDB, Maybe Value)
 updateById x n val (DummyDB db)
-    | newDB == db = (DummyDB db, Nothing)
-    | otherwise   = (DummyDB newDB, Just val)
-    where newDB = db & key x . _Array %~ modifyEntity n val
+    | DummyDB newDB == DummyDB db = (DummyDB db, Nothing)
+    | otherwise   = (DummyDB newDB, Just newVal)
+    where
+        newVal = val & _Object %~ setId n
+        newDB  = db & key x . _Array %~ modifyEntity n newVal
 
 modifyEntity :: EntityId -> Value -> V.Vector Value -> V.Vector Value
 modifyEntity n val currents =
     case V.findIndex (idIs n) currents of
         Nothing  -> currents
-        Just idx -> currents V.// [(idx, val & _Object %~ setId n)]
+        Just idx -> currents V.// [(idx, val)]
 
 idIs :: EntityId -> Value -> Bool
 idIs n val = val ^? key (T.pack "id") . _Integer == Just n

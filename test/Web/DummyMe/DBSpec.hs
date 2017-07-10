@@ -141,7 +141,7 @@ spec = do
                 entry ^? key "name" `shouldBe` carol ^? key "name"
             it "should update the entry by the specified id" $ do
                 let (newDB, Just entry) = updateById "users" 2 carolWithoutId db
-                newDB `shouldBe` updAliceDB
+                newDB `shouldBe` updBobDB
                 entry ^? key "id" . _Number `shouldBe` Just 2
                 entry ^? key "name" `shouldBe` carol ^? key "name"
         context "when the given key has a non-array entry" $ do

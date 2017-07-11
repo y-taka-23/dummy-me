@@ -26,6 +26,9 @@ main = do
 
         post var $ \key -> postAction key
 
+        put var $ \key -> putAction key
+        put (var <//> var) $ \key id -> putByIdAction key id
+
 getAction key = do
     (InMemoryDB dbRef) <- getState
     db <- liftIO $ readIORef dbRef
@@ -52,5 +55,21 @@ postAction key = do
     (InMemoryDB dbRef) <- getState
     mInserted <- liftIO $ atomicModifyIORef' dbRef (insert key entry)
     case mInserted of
+        Nothing -> error "unreachable code"
+        Just _ -> error "unreachable code"
+
+putAction key = do
+    entry <- jsonBody' -- returns 400 on parsing error
+    (InMemoryDB dbRef) <- getState
+    mUpdated <- liftIO $ atomicModifyIORef' dbRef (update key entry)
+    case mUpdated of
+        Nothing -> error "unreachable code"
+        Just _ -> error "unreachable code"
+
+putByIdAction key id = do
+    entry <- jsonBody' -- returns 400 on parsing error
+    (InMemoryDB dbRef) <- getState
+    mUpdated <- liftIO $ atomicModifyIORef' dbRef (updateById key id entry)
+    case mUpdated of
         Nothing -> error "unreachable code"
         Just _ -> error "unreachable code"

@@ -17,6 +17,7 @@ library
   hs-source-dirs:      src
   default-language:    Haskell2010
   exposed-modules:     Web.DummyMe.DB
+                     , Web.DummyMe.Handler
   build-depends:       base >= 4.7 && < 5
                      , text
                      , aeson
@@ -26,6 +27,7 @@ library
                      , vector
                      , unordered-containers
                      , scientific
+                     , Spock
 
 executable dummy-me
   hs-source-dirs:      app

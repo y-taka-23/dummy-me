@@ -18,6 +18,9 @@ import Web.Spock
 
 data InMemoryDB = InMemoryDB (IORef DummyDB)
 
+getHandler :: (SpockState (ActionCtxT ctx m) ~ InMemoryDB,
+               HasSpock (ActionCtxT ctx m), MonadIO m) =>
+           TopLevelKey -> ActionCtxT ctx m b
 getHandler key = do
     (InMemoryDB dbRef) <- getState
     db <- liftIO $ readIORef dbRef
@@ -25,6 +28,9 @@ getHandler key = do
         (_, Nothing) -> error "unreachable code"
         (_, Just val) -> json val
 
+getByIdHandler :: (SpockState (ActionCtxT ctx m) ~ InMemoryDB,
+                   HasSpock (ActionCtxT ctx m), MonadIO m) =>
+               TopLevelKey -> EntityId -> ActionCtxT ctx m b
 getByIdHandler key id = do
     (InMemoryDB dbRef) <- getState
     db <- liftIO $ readIORef dbRef
@@ -32,6 +38,9 @@ getByIdHandler key id = do
         (_, Nothing) -> error "unreachable code"
         (_, Just val) -> json val
 
+deleteByIdHandler :: (SpockState (ActionCtxT ctx m) ~ InMemoryDB,
+                      HasSpock (ActionCtxT ctx m), MonadIO m) =>
+                  TopLevelKey -> EntityId -> ActionCtxT ctx m b
 deleteByIdHandler key id = do
     (InMemoryDB dbRef) <- getState
     mDeleted <- liftIO $ atomicModifyIORef' dbRef (deleteById key id)
@@ -39,6 +48,9 @@ deleteByIdHandler key id = do
         Nothing -> error "unreachable code"
         Just _ -> error "unreachable code"
 
+postHandler :: (SpockState (ActionCtxT ctx m) ~ InMemoryDB,
+                HasSpock (ActionCtxT ctx m), MonadIO m) =>
+            TopLevelKey -> ActionCtxT ctx m b
 postHandler key = do
     entry <- jsonBody' -- returns 400 on parsing error
     (InMemoryDB dbRef) <- getState
@@ -47,6 +59,9 @@ postHandler key = do
         Nothing -> error "unreachable code"
         Just _ -> error "unreachable code"
 
+putHandler :: (SpockState (ActionCtxT ctx m) ~ InMemoryDB,
+               HasSpock (ActionCtxT ctx m), MonadIO m) =>
+           TopLevelKey -> ActionCtxT ctx m b
 putHandler key = do
     entry <- jsonBody' -- returns 400 on parsing error
     (InMemoryDB dbRef) <- getState
@@ -55,6 +70,9 @@ putHandler key = do
         Nothing -> error "unreachable code"
         Just _ -> error "unreachable code"
 
+putByIdHandler :: (SpockState (ActionCtxT ctx m) ~ InMemoryDB,
+                   HasSpock (ActionCtxT ctx m), MonadIO m) =>
+               TopLevelKey -> EntityId -> ActionCtxT ctx m b
 putByIdHandler key id = do
     entry <- jsonBody' -- returns 400 on parsing error
     (InMemoryDB dbRef) <- getState

@@ -4,6 +4,12 @@ cache:
   directries:
   - $HOME/.stack
 
+# additional libraries
+addons:
+  apt:
+    packages:
+    - libgmp-dev
+
 # get stack binary
 before_install:
 - mkdir -p $HOME/.local/bin

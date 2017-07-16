@@ -10,11 +10,10 @@ import Web.Spock.Config
 
 main :: IO ()
 main = do
-    cfg <- getConfig
-    dummyDB <- loadDummyDB $ file cfg
-    dbRef <- newIORef dummyDB
-    spockCfg <- defaultSpockCfg () PCNoDatabase (InMemoryDB dbRef)
-    runSpock (port cfg) $ spock spockCfg $ do
+    appCfg <- getConfig
+    dummyDB <- loadDummyDB $ file appCfg
+    spockCfg <- mkSpockCfg dummyDB
+    runSpock (port appCfg) $ spock spockCfg $ do
 
         get var $ \key -> getHandler key
         get (var <//> var) $ \key id -> getByIdHandler key id
@@ -25,3 +24,9 @@ main = do
 
         put var $ \key -> putHandler key
         put (var <//> var) $ \key id -> putByIdHandler key id
+
+mkSpockCfg :: DummyDB -> IO (SpockCfg () () InMemoryDB)
+mkSpockCfg initDB = do
+    dbRef <- newIORef initDB
+    cfg <- defaultSpockCfg () PCNoDatabase (InMemoryDB dbRef)
+    return $ cfg { spc_errorHandler = errorHandler }

@@ -8,12 +8,14 @@ module Web.DummyMe.Handler (
     , postHandler
     , putHandler
     , putByIdHandler
+    , errorHandler
     ) where
 
 import Web.DummyMe.DB
 
 import Control.Monad.IO.Class
 import Data.IORef
+import Network.HTTP.Types.Status
 import Web.Spock
 
 data InMemoryDB = InMemoryDB (IORef DummyDB)
@@ -25,7 +27,7 @@ getHandler key = do
     (InMemoryDB dbRef) <- getState
     db <- liftIO $ readIORef dbRef
     case select key db of
-        (_, Nothing) -> error "unreachable code"
+        (_, Nothing) -> errorHandler notFound404
         (_, Just val) -> json val
 
 getByIdHandler :: (SpockState (ActionCtxT ctx m) ~ InMemoryDB,
@@ -35,7 +37,7 @@ getByIdHandler key id = do
     (InMemoryDB dbRef) <- getState
     db <- liftIO $ readIORef dbRef
     case selectById key id db of
-        (_, Nothing) -> error "unreachable code"
+        (_, Nothing) -> errorHandler notFound404
         (_, Just val) -> json val
 
 deleteByIdHandler :: (SpockState (ActionCtxT ctx m) ~ InMemoryDB,
@@ -45,8 +47,8 @@ deleteByIdHandler key id = do
     (InMemoryDB dbRef) <- getState
     mDeleted <- liftIO $ atomicModifyIORef' dbRef (deleteById key id)
     case mDeleted of
-        Nothing -> error "unreachable code"
-        Just _ -> error "unreachable code"
+        Nothing -> errorHandler notFound404
+        Just _ -> setStatus noContent204 >> json ""
 
 postHandler :: (SpockState (ActionCtxT ctx m) ~ InMemoryDB,
                 HasSpock (ActionCtxT ctx m), MonadIO m) =>
@@ -56,8 +58,9 @@ postHandler key = do
     (InMemoryDB dbRef) <- getState
     mInserted <- liftIO $ atomicModifyIORef' dbRef (insert key entry)
     case mInserted of
-        Nothing -> error "unreachable code"
-        Just _ -> error "unreachable code"
+        Nothing -> errorHandler notFound404
+        -- TODO: add Location header
+        Just val -> setStatus created201 >> json val
 
 putHandler :: (SpockState (ActionCtxT ctx m) ~ InMemoryDB,
                HasSpock (ActionCtxT ctx m), MonadIO m) =>
@@ -67,8 +70,8 @@ putHandler key = do
     (InMemoryDB dbRef) <- getState
     mUpdated <- liftIO $ atomicModifyIORef' dbRef (update key entry)
     case mUpdated of
-        Nothing -> error "unreachable code"
-        Just _ -> error "unreachable code"
+        Nothing -> errorHandler notFound404
+        Just _ -> setStatus noContent204 >> json ""
 
 putByIdHandler :: (SpockState (ActionCtxT ctx m) ~ InMemoryDB,
                    HasSpock (ActionCtxT ctx m), MonadIO m) =>
@@ -78,5 +81,9 @@ putByIdHandler key id = do
     (InMemoryDB dbRef) <- getState
     mUpdated <- liftIO $ atomicModifyIORef' dbRef (updateById key id entry)
     case mUpdated of
-        Nothing -> error "unreachable code"
-        Just _ -> error "unreachable code"
+        Nothing -> errorHandler notFound404
+        Just _ -> setStatus noContent204 >> json ""
+
+-- TODO: create JSON templates for each status
+errorHandler :: (MonadIO m) => Status -> ActionCtxT ctx m b
+errorHandler status = setStatus status >> json ""

@@ -30,6 +30,7 @@ library
                      , scientific
                      , Spock
                      , optparse-applicative
+                     , http-types
 
 executable dummy-me
   hs-source-dirs:      app

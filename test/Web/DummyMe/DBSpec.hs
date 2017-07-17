@@ -12,7 +12,7 @@ import qualified Data.Vector       as V
 db :: DummyDB
 db = DummyDB "{ \"users\": [ { \"id\": 1, \"name\": \"Alice\" }, { \"id\": 2, \"name\": \"Bob\" } ], \"status\": \"test\" }"
 
-alice, bob :: Value
+alice, bob :: Entity
 alice = object [ "id" .= Number 1, "name" .= String "Alice" ]
 bob   = object [ "id" .= Number 2, "name" .= String "Bob" ]
 
@@ -20,14 +20,14 @@ delAliceDB, delBobDB :: DummyDB
 delAliceDB = DummyDB "{ \"users\": [ { \"id\": 2, \"name\": \"Bob\" } ], \"status\": \"test\" }"
 delBobDB   = DummyDB "{ \"users\": [ { \"id\": 1, \"name\": \"Alice\" } ], \"status\": \"test\" }"
 
-carol, carolWithoutId :: Value
+carol, carolWithoutId :: Entity
 carol          = object [ "id" .= Number 0, "name" .= String "Carol" ]
 carolWithoutId = object [ "name" .= String "Carol" ]
 
 insCarolDB :: DummyDB
 insCarolDB = DummyDB "{ \"users\": [ { \"id\": 1, \"name\": \"Alice\" }, { \"id\": 2, \"name\": \"Bob\" }, { \"id\": 3, \"name\": \"Carol\" } ], \"status\": \"test\" }"
 
-statusString, statusObject :: Value
+statusString, statusObject :: Entity
 statusString = String "running"
 statusObject = object [ "prev" .= String "started", "next" .= String "stopped" ]
 

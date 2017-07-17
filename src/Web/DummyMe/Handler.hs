@@ -28,7 +28,7 @@ getHandler key = do
     db <- liftIO $ readIORef dbRef
     case select key db of
         (_, Nothing) -> errorHandler notFound404
-        (_, Just val) -> json val
+        (_, Just ent) -> json ent
 
 getByIdHandler :: (SpockState (ActionCtxT ctx m) ~ InMemoryDB,
                    HasSpock (ActionCtxT ctx m), MonadIO m) =>
@@ -38,7 +38,7 @@ getByIdHandler key id = do
     db <- liftIO $ readIORef dbRef
     case selectById key id db of
         (_, Nothing) -> errorHandler notFound404
-        (_, Just val) -> json val
+        (_, Just ent) -> json ent
 
 deleteByIdHandler :: (SpockState (ActionCtxT ctx m) ~ InMemoryDB,
                       HasSpock (ActionCtxT ctx m), MonadIO m) =>

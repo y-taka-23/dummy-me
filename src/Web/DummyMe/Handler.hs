@@ -13,10 +13,12 @@ module Web.DummyMe.Handler (
 
 import Web.DummyMe.DB
 
-import Control.Monad.IO.Class
-import Data.IORef
-import Network.HTTP.Types.Status
-import Web.Spock
+import           Control.Monad.IO.Class
+import           Data.IORef
+import           Data.Maybe
+import qualified Data.Text                  as T
+import           Network.HTTP.Types.Status
+import           Web.Spock
 
 data InMemoryDB = InMemoryDB (IORef DummyDB)
 
@@ -59,8 +61,10 @@ postHandler key = do
     mInserted <- liftIO $ atomicModifyIORef' dbRef (insert key entry)
     case mInserted of
         Nothing -> errorHandler notFound404
-        -- TODO: add Location header
-        Just val -> setStatus created201 >> json val
+        Just ent -> do
+            setStatus created201
+            setLocation key ent
+            json ent
 
 putHandler :: (SpockState (ActionCtxT ctx m) ~ InMemoryDB,
                HasSpock (ActionCtxT ctx m), MonadIO m) =>
@@ -87,3 +91,18 @@ putByIdHandler key id = do
 -- TODO: create JSON templates for each status
 errorHandler :: (MonadIO m) => Status -> ActionCtxT ctx m b
 errorHandler status = setStatus status >> json ""
+
+-- TODO: better way of building the URI
+formatLocation :: T.Text -> TopLevelKey -> EntityId -> T.Text
+formatLocation host key id = T.concat [
+      T.pack "http://", host
+    , T.pack "/", key, T.pack "/", T.pack (show id)
+    ]
+
+setLocation :: MonadIO m => TopLevelKey -> Entity -> ActionCtxT ctx m ()
+setLocation key ent = do
+    mHost <- header (T.pack "Host")
+    case (mHost, idOf ent) of
+        (Just host, Just id) -> do
+            setHeader (T.pack "Location") (formatLocation host key id)
+        (_, _) -> error "unreachable"

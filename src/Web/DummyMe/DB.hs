@@ -10,6 +10,7 @@ module Web.DummyMe.DB (
     , insert
     , update
     , updateById
+    , idOf
     ) where
 
 import           Control.Lens
@@ -99,5 +100,8 @@ modifyEntity n ent currents =
         Nothing  -> currents
         Just idx -> currents V.// [(idx, ent)]
 
-idIs :: EntityId -> Value -> Bool
-idIs n val = val ^? key (T.pack "id") . _Integer == Just n
+idOf :: Entity -> Maybe EntityId
+idOf ent = ent ^? key (T.pack "id") . _Integer
+
+idIs :: EntityId -> Entity -> Bool
+idIs n ent = idOf ent == Just n

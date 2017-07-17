@@ -48,7 +48,6 @@ test-suite hspec
                      , hspec
                      , dummy-me
                      , aeson
-                     , unordered-containers
                      , vector
                      , lens
                      , lens-aeson

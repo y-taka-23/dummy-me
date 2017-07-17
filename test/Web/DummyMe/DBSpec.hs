@@ -4,33 +4,32 @@ module Web.DummyMe.DBSpec where
 import Test.Hspec
 import Web.DummyMe.DB
 
-import           Control.Lens
+import           Control.Lens      hiding ( (.=) )
 import           Data.Aeson
 import           Data.Aeson.Lens
-import qualified Data.HashMap.Lazy as HM
 import qualified Data.Vector       as V
 
 db :: DummyDB
 db = DummyDB "{ \"users\": [ { \"id\": 1, \"name\": \"Alice\" }, { \"id\": 2, \"name\": \"Bob\" } ], \"status\": \"test\" }"
 
 alice, bob :: Value
-alice = Object $ HM.fromList [ ("id", Number 1), ("name", String "Alice") ]
-bob   = Object $ HM.fromList [ ("id", Number 2), ("name", String "Bob") ]
+alice = object [ "id" .= Number 1, "name" .= String "Alice" ]
+bob   = object [ "id" .= Number 2, "name" .= String "Bob" ]
 
 delAliceDB, delBobDB :: DummyDB
 delAliceDB = DummyDB "{ \"users\": [ { \"id\": 2, \"name\": \"Bob\" } ], \"status\": \"test\" }"
 delBobDB   = DummyDB "{ \"users\": [ { \"id\": 1, \"name\": \"Alice\" } ], \"status\": \"test\" }"
 
 carol, carolWithoutId :: Value
-carol          = Object $ HM.fromList [ ("id", Number 0), ("name", String "Carol") ]
-carolWithoutId = Object $ HM.fromList [ ("name", String "Carol") ]
+carol          = object [ "id" .= Number 0, "name" .= String "Carol" ]
+carolWithoutId = object [ "name" .= String "Carol" ]
 
 insCarolDB :: DummyDB
 insCarolDB = DummyDB "{ \"users\": [ { \"id\": 1, \"name\": \"Alice\" }, { \"id\": 2, \"name\": \"Bob\" }, { \"id\": 3, \"name\": \"Carol\" } ], \"status\": \"test\" }"
 
 statusString, statusObject :: Value
 statusString = String "running"
-statusObject = Object $ HM.fromList [ ("prev", String "started"), ("next", String "stopped") ]
+statusObject = object [ "prev" .= String "started", "next" .= String "stopped" ]
 
 updStatusStringDB = DummyDB "{ \"users\": [ { \"id\": 1, \"name\": \"Alice\" }, { \"id\": 2, \"name\": \"Bob\" } ], \"status\": \"running\" }"
 updStatusObjectDB = DummyDB "{ \"users\": [ { \"id\": 1, \"name\": \"Alice\" }, { \"id\": 2, \"name\": \"Bob\" } ], \"status\": { \"prev\": \"started\", \"next\": \"stopped\" } }"

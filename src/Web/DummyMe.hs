@@ -14,6 +14,7 @@ runDummyMe :: Config -> IO ()
 runDummyMe appCfg = do
     dummyDB <- loadDummyDB $ file appCfg
     spockCfg <- mkSpockCfg dummyDB
+    putStrLn $ "DummyMe is running on port " ++ show (port appCfg)
     runSpockNoBanner (port appCfg) $ spock spockCfg routes
 
 mkSpockCfg :: DummyDB -> IO (SpockCfg () () InMemoryDB)

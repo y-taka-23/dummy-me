@@ -6,6 +6,12 @@ DummyMe - A simple dummy server for REST APIs
 Installation
 ------------
 
+```
+$ git clone git@github.com:y-taka-23/dummy-me.git
+$ cd dummy-me
+$ stack install
+```
+
 Getting Started
 ---------------
 

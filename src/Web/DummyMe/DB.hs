@@ -18,6 +18,7 @@ import           Data.Aeson
 import           Data.Aeson.Lens
 import qualified Data.ByteString.Lazy   as BS
 import qualified Data.HashMap.Lazy      as HM
+import           Data.Maybe
 import qualified Data.Scientific        as SCI
 import qualified Data.Text              as T
 import qualified Data.Vector            as V
@@ -30,6 +31,9 @@ type Entity = Value
 instance Eq DummyDB where
     (==) (DummyDB x) (DummyDB y) =
         (decode x :: Maybe Entity) == (decode y :: Maybe Entity)
+
+instance ToJSON DummyDB where
+    toJSON (DummyDB db) = fromMaybe (error "unreachable") (decode db)
 
 loadDummyDB :: FilePath -> IO DummyDB
 loadDummyDB fp = DummyDB <$> BS.readFile fp

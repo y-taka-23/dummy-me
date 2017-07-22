@@ -9,6 +9,7 @@ module Web.DummyMe.Handler (
     , putHandler
     , putByIdHandler
     , errorHandler
+    , getDBHandler
     ) where
 
 import Web.DummyMe.DB
@@ -106,3 +107,10 @@ setLocation key ent = do
         (Just host, Just id) -> do
             setHeader (T.pack "Location") (formatLocation host key id)
         (_, _) -> error "unreachable"
+
+getDBHandler :: (SpockState (ActionCtxT ctx m) ~ InMemoryDB,
+                 HasSpock (ActionCtxT ctx m), MonadIO m) =>
+             ActionCtxT ctx m b
+getDBHandler = do
+    (InMemoryDB dbRef) <- getState
+    json =<< liftIO (readIORef dbRef)

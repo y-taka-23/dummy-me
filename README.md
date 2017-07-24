@@ -17,3 +17,5 @@ Getting Started
 
 License
 -------
+
+This project is released under the BSD 3-clause license. For more details, see [LICENSE](./LICENSE) file.

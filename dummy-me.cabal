@@ -20,6 +20,7 @@ library
                      , Web.DummyMe.DB
                      , Web.DummyMe.Handler
                      , Web.DummyMe.Config
+  other-modules:       Paths_dummy_me
   build-depends:       base >= 4.7 && < 5
                      , text
                      , aeson

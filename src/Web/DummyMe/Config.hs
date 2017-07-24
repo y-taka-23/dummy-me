@@ -6,8 +6,9 @@ module Web.DummyMe.Config (
 import Options.Applicative
 
 data Config = Config {
-      file :: FilePath
-    , port :: Int
+      file    :: FilePath
+    , port    :: Int
+    , version :: Bool
     }
 
 getConfig :: IO Config
@@ -33,8 +34,15 @@ portP = option auto $ mconcat [
     , showDefault
     ]
 
+-- TODO: For which -v should be --version or --verbose?
+versionP :: Parser Bool
+versionP = switch $ mconcat [
+      long "version"
+    , help "Shows the version information"
+    ]
+
 configP :: Parser Config
-configP = helper <*> (Config <$> fileP <*> portP)
+configP = helper <*> (Config <$> fileP <*> portP <*> versionP)
 
 configParserInfo :: ParserInfo Config
 configParserInfo = info configP $ mconcat [

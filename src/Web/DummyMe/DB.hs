@@ -4,6 +4,7 @@ module Web.DummyMe.DB (
     , EntityId(..)
     , Entity(..)
     , loadDummyDB
+    , dumpDummyDB
     , select
     , selectById
     , deleteById
@@ -37,6 +38,9 @@ instance ToJSON DummyDB where
 
 loadDummyDB :: FilePath -> IO DummyDB
 loadDummyDB fp = DummyDB <$> BS.readFile fp
+
+dumpDummyDB :: FilePath -> DummyDB -> IO ()
+dumpDummyDB fp (DummyDB db) = BS.writeFile fp db
 
 select :: TopLevelKey -> DummyDB -> (DummyDB, Maybe Entity)
 select x (DummyDB db) = (DummyDB db, db ^? key x)

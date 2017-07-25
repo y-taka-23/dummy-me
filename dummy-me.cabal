@@ -33,6 +33,7 @@ library
                      , Spock
                      , optparse-applicative
                      , http-types
+                     , uuid
 
 executable dummy-me
   hs-source-dirs:      app

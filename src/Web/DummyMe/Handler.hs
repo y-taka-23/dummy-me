@@ -10,6 +10,7 @@ module Web.DummyMe.Handler (
     , putByIdHandler
     , errorHandler
     , getDBHandler
+    , postDumpHandler
     ) where
 
 import Web.DummyMe.DB
@@ -18,6 +19,8 @@ import           Control.Monad.IO.Class
 import           Data.IORef
 import           Data.Maybe
 import qualified Data.Text                  as T
+import           Data.UUID
+import qualified Data.UUID.V4               as V4
 import           Network.HTTP.Types.Status
 import           Web.Spock
 
@@ -114,3 +117,18 @@ getDBHandler :: (SpockState (ActionCtxT ctx m) ~ InMemoryDB,
 getDBHandler = do
     (InMemoryDB dbRef) <- getState
     json =<< liftIO (readIORef dbRef)
+
+postDumpHandler :: (SpockState (ActionCtxT ctx m) ~ InMemoryDB,
+                    HasSpock (ActionCtxT ctx m), MonadIO m) =>
+                ActionCtxT ctx m b
+postDumpHandler = do
+    (InMemoryDB dbRef) <- getState
+    liftIO $ do
+        uuid <- V4.nextRandom
+        dummyDB <- readIORef dbRef
+        dumpDummyDB (dumpFilePath uuid) dummyDB
+    setStatus noContent204 >> json ""
+
+-- TODO: parameterize the path
+dumpFilePath :: UUID -> FilePath
+dumpFilePath uuid = "db-" ++ toString uuid ++ ".json"

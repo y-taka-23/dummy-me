@@ -33,6 +33,7 @@ mkSpockCfg initDB = do
 routes :: SpockCtxM ctx conn sess InMemoryDB ()
 routes = do
     get    "_db"                       getDBHandler
+    post   "_dump"                     postDumpHandler
     get     var           $ \key    -> getHandler key
     get    (var <//> var) $ \key id -> getByIdHandler key id
     delete (var <//> var) $ \key id -> deleteByIdHandler key id

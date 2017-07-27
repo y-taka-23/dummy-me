@@ -6,14 +6,28 @@ DummyMe - A simple dummy server for REST APIs
 Installation
 ------------
 
+Get the sources from the repository and build them by Stack:
+
 ```
 $ git clone git@github.com:y-taka-23/dummy-me.git
 $ cd dummy-me
 $ stack install
 ```
 
-Getting Started
----------------
+How to Use
+----------
+
+```json
+{
+  "posts": [
+    { "id": 1, "title": "json-server", "author": "typicode" }
+  ],
+  "comments": [
+    { "id": 1, "body": "some comment", "postId": 1 }
+  ],
+  "profile": { "name": "typicode" }
+}
+```
 
 License
 -------

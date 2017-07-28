@@ -34,6 +34,7 @@ library
                      , optparse-applicative
                      , http-types
                      , uuid
+                     , wai-extra
 
 executable dummy-me
   hs-source-dirs:      app

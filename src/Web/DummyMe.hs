@@ -9,6 +9,7 @@ import Web.DummyMe.Handler
 
 import           Data.IORef
 import           Data.Version
+import           Network.Wai.Middleware.RequestLogger
 import qualified Paths_dummy_me
 import           Web.Spock        hiding ( file )
 import           Web.Spock.Config
@@ -22,7 +23,8 @@ runDummyMe appCfg =
         dummyDB <- loadDummyDB $ file appCfg
         spockCfg <- mkSpockCfg dummyDB
         putStrLn $ "DummyMe is running on port " ++ show (port appCfg)
-        runSpockNoBanner (port appCfg) $ spock spockCfg routes
+        runSpockNoBanner (port appCfg) $
+            fmap (logStdoutDev .) $ spock spockCfg routes
 
 mkSpockCfg :: DummyDB -> IO (SpockCfg () () InMemoryDB)
 mkSpockCfg initDB = do

@@ -33,8 +33,8 @@ library
                      , Spock
                      , optparse-applicative
                      , http-types
-                     , uuid
                      , wai-extra
+                     , unix
 
 executable dummy-me
   hs-source-dirs:      app

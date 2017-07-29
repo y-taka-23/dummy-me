@@ -10,7 +10,7 @@ module Web.DummyMe.Handler (
     , putByIdHandler
     , errorHandler
     , getDBHandler
-    , postDumpHandler
+    , postSnapshotHandler
     ) where
 
 import Web.DummyMe.DB
@@ -19,9 +19,8 @@ import           Control.Monad.IO.Class
 import           Data.IORef
 import           Data.Maybe
 import qualified Data.Text                  as T
-import           Data.UUID
-import qualified Data.UUID.V4               as V4
 import           Network.HTTP.Types.Status
+import           System.Posix
 import           Web.Spock
 
 data InMemoryDB = InMemoryDB (IORef DummyDB)
@@ -118,17 +117,17 @@ getDBHandler = do
     (InMemoryDB dbRef) <- getState
     json =<< liftIO (readIORef dbRef)
 
-postDumpHandler :: (SpockState (ActionCtxT ctx m) ~ InMemoryDB,
-                    HasSpock (ActionCtxT ctx m), MonadIO m) =>
-                ActionCtxT ctx m b
-postDumpHandler = do
+postSnapshotHandler :: (SpockState (ActionCtxT ctx m) ~ InMemoryDB,
+                        HasSpock (ActionCtxT ctx m), MonadIO m) =>
+                    ActionCtxT ctx m b
+postSnapshotHandler = do
     (InMemoryDB dbRef) <- getState
     liftIO $ do
-        uuid <- V4.nextRandom
+        time <- epochTime
         dummyDB <- readIORef dbRef
-        dumpDummyDB (dumpFilePath uuid) dummyDB
+        dumpDummyDB (snapshotFilePath time) dummyDB
     setStatus noContent204 >> json ""
 
 -- TODO: parameterize the path
-dumpFilePath :: UUID -> FilePath
-dumpFilePath uuid = "db-" ++ toString uuid ++ ".json"
+snapshotFilePath :: EpochTime -> FilePath
+snapshotFilePath time = "snapshot-" ++ show time ++ ".json"

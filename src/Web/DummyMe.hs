@@ -21,18 +21,18 @@ runDummyMe appCfg =
         putStrLn $ "DummyMe " ++ showVersion Paths_dummy_me.version
     else do
         dummyDB <- loadDummyDB $ file appCfg
-        spockCfg <- mkSpockCfg dummyDB
+        spockCfg <- mkSpockCfg appCfg dummyDB
         putStrLn $ "DummyMe is running on port " ++ show (port appCfg)
         runSpockNoBanner (port appCfg) $
             fmap (logStdoutDev .) $ spock spockCfg routes
 
-mkSpockCfg :: DummyDB -> IO (SpockCfg () () InMemoryDB)
-mkSpockCfg initDB = do
+mkSpockCfg :: Config -> DummyDB -> IO (SpockCfg () () AppState)
+mkSpockCfg appCfg initDB = do
     dbRef <- newIORef initDB
-    cfg <- defaultSpockCfg () PCNoDatabase (InMemoryDB dbRef)
+    cfg <- defaultSpockCfg () PCNoDatabase $ mkAppState appCfg dbRef
     return $ cfg { spc_errorHandler = errorHandler }
 
-routes :: SpockCtxM ctx conn sess InMemoryDB ()
+routes :: SpockCtxM ctx conn sess AppState ()
 routes = do
     get    "_db"                       getDBHandler
     post   "_snapshot"                 postSnapshotHandler

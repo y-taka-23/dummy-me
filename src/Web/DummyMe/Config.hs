@@ -6,9 +6,10 @@ module Web.DummyMe.Config (
 import Options.Applicative
 
 data Config = Config {
-      file    :: FilePath
-    , port    :: Int
-    , version :: Bool
+      file      :: FilePath
+    , port      :: Int
+    , snapshots :: FilePath
+    , version   :: Bool
     }
 
 getConfig :: IO Config
@@ -34,6 +35,15 @@ portP = option auto $ mconcat [
     , showDefault
     ]
 
+snapshotsP :: Parser String
+snapshotsP = option str $ mconcat [
+      long "snapshots"
+    , value "."
+    , help "Directory to store the database snapshots"
+    , metavar "string"
+    , showDefault
+    ]
+
 -- TODO: For which -v should be --version or --verbose?
 versionP :: Parser Bool
 versionP = switch $ mconcat [
@@ -42,7 +52,7 @@ versionP = switch $ mconcat [
     ]
 
 configP :: Parser Config
-configP = helper <*> (Config <$> fileP <*> portP <*> versionP)
+configP = helper <*> (Config <$> fileP <*> portP <*> snapshotsP <*> versionP)
 
 configParserInfo :: ParserInfo Config
 configParserInfo = info configP $ mconcat [

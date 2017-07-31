@@ -35,6 +35,7 @@ library
                      , http-types
                      , wai-extra
                      , unix
+                     , directory
 
 executable dummy-me
   hs-source-dirs:      app

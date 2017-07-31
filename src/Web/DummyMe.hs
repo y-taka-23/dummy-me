@@ -11,6 +11,7 @@ import           Data.IORef
 import           Data.Version
 import           Network.Wai.Middleware.RequestLogger
 import qualified Paths_dummy_me
+import           System.Directory
 import           Web.Spock        hiding ( file )
 import           Web.Spock.Config
 
@@ -20,6 +21,7 @@ runDummyMe appCfg =
     then do
         putStrLn $ "DummyMe " ++ showVersion Paths_dummy_me.version
     else do
+        createDirectoryIfMissing True $ snapshots appCfg
         dummyDB <- loadDummyDB $ file appCfg
         spockCfg <- mkSpockCfg appCfg dummyDB
         putStrLn $ "DummyMe is running on port " ++ show (port appCfg)

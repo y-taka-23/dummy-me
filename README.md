@@ -19,13 +19,12 @@ How to Use
 
 ```json
 {
-  "posts": [
-    { "id": 1, "title": "json-server", "author": "typicode" }
+  "todos": [
+    { "id": 1, "title": "Install Stack",   "completed": true }
+    { "id": 2, "title": "Learn Haskell",   "completed": true }
+    { "id": 3, "title": "Utilize DummyMe", "completed": false }
   ],
-  "comments": [
-    { "id": 1, "body": "some comment", "postId": 1 }
-  ],
-  "profile": { "name": "typicode" }
+  "profile": { "name": "Alice", "email": "alice@example.com" }
 }
 ```
 

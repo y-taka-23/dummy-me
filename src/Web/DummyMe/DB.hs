@@ -19,6 +19,7 @@ import           Data.Aeson
 import           Data.Aeson.Lens
 import qualified Data.ByteString.Lazy   as BS
 import qualified Data.HashMap.Lazy      as HM
+import qualified Data.List              as L
 import           Data.Maybe
 import qualified Data.Scientific        as SCI
 import qualified Data.Text              as T
@@ -36,11 +37,26 @@ instance Eq DummyDB where
 instance ToJSON DummyDB where
     toJSON (DummyDB db) = fromMaybe (error "unreachable") (decode db)
 
+data Schema = Schema {
+      pluralKeys   :: [TopLevelKey]
+    , singularKeys :: [TopLevelKey]
+    }
+
 loadDummyDB :: FilePath -> IO DummyDB
 loadDummyDB fp = DummyDB <$> BS.readFile fp
 
 dumpDummyDB :: FilePath -> DummyDB -> IO ()
 dumpDummyDB fp (DummyDB db) = BS.writeFile fp db
+
+topLevelKeys :: DummyDB -> [TopLevelKey]
+topLevelKeys (DummyDB db) = case decode db of
+    Just (Object obj) -> HM.keys obj
+    _                 -> error "unreachable"
+
+schema :: DummyDB -> Schema
+schema dummyDB =
+    let (ss, ps) = L.partition (isSingular dummyDB) (topLevelKeys dummyDB)
+    in  Schema { pluralKeys = ps, singularKeys = ss }
 
 select :: TopLevelKey -> DummyDB -> (DummyDB, Maybe Entity)
 select x (DummyDB db) = (DummyDB db, db ^? key x)
@@ -84,11 +100,11 @@ nextId currents =
 
 update :: TopLevelKey -> Entity -> DummyDB -> (DummyDB, Maybe Entity)
 update x ent (DummyDB db)
-    | isSingular x (DummyDB db) = (DummyDB $ db & key x .~ ent, Just ent)
+    | isSingular (DummyDB db) x = (DummyDB $ db & key x .~ ent, Just ent)
     | otherwise                 = (DummyDB db, Nothing)
 
-isSingular :: TopLevelKey -> DummyDB -> Bool
-isSingular x (DummyDB db) = case db ^? key x of
+isSingular :: DummyDB -> TopLevelKey -> Bool
+isSingular (DummyDB db) x = case db ^? key x of
     Just (Array _) -> False
     Just _         -> True
     Nothing        -> False

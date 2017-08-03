@@ -20,8 +20,8 @@ How to Use
 ```json
 {
   "todos": [
-    { "id": 1, "title": "Install Stack",   "completed": true }
-    { "id": 2, "title": "Learn Haskell",   "completed": true }
+    { "id": 1, "title": "Install Stack",   "completed": true },
+    { "id": 2, "title": "Learn Haskell",   "completed": true },
     { "id": 3, "title": "Utilize DummyMe", "completed": false }
   ],
   "profile": { "name": "Alice", "email": "alice@example.com" }

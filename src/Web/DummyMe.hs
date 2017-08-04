@@ -8,6 +8,7 @@ import Web.DummyMe.Config
 import Web.DummyMe.Handler
 
 import           Data.IORef
+import           Data.Text        as T
 import           Data.Version
 import           Network.Wai.Middleware.RequestLogger
 import qualified Paths_dummy_me
@@ -21,10 +22,12 @@ runDummyMe appCfg =
     then do
         putStrLn $ "DummyMe " ++ showVersion Paths_dummy_me.version
     else do
-        createDirectoryIfMissing True $ snapshots appCfg
+        printLogo
+        putStrLn $ "Laoding database from " ++ file appCfg
         dummyDB <- loadDummyDB $ file appCfg
+        printRoutes appCfg dummyDB
+        createDirectoryIfMissing True $ snapshots appCfg
         spockCfg <- mkSpockCfg appCfg dummyDB
-        putStrLn $ "DummyMe is running on port " ++ show (port appCfg)
         runSpockNoBanner (port appCfg) $
             fmap (logStdoutDev .) $ spock spockCfg routes
 
@@ -44,3 +47,26 @@ routes = do
     post    var           $ \key    -> postHandler key
     put     var           $ \key    -> putHandler key
     put    (var <//> var) $ \key id -> putByIdHandler key id
+
+printLogo :: IO ()
+printLogo = mapM_ putStrLn [
+      " ____                                  __  __"
+    , "|  _ \\ _   _ _ __ ___  _ __ ___  _   _|  \\/  | ___"
+    , "| | | | | | | '_ ` _ \\| '_ ` _ \\| | | | |\\/| |/ _ \\"
+    , "| |_| | |_| | | | | | | | | | | | |_| | |  | |  __/"
+    , "|____/ \\__,_|_| |_| |_|_| |_| |_|\\__, |_|  |_|\\___|"
+    , "_________________________________|___/_____________"
+    , ""
+    ]
+
+printRoutes :: Config -> DummyDB -> IO ()
+printRoutes appCfg dummyDB = do
+    let sch = schema dummyDB
+    putStrLn ""
+    mapM_ (putStrLn . showRoute (port appCfg)) $ pluralKeys sch
+    mapM_ (putStrLn . showRoute (port appCfg)) $ singularKeys sch
+    putStrLn ""
+
+-- TODO: parameterize the host
+showRoute :: Int -> TopLevelKey -> String
+showRoute p x = "- http://localhost:" ++ show p ++ "/" ++ T.unpack x

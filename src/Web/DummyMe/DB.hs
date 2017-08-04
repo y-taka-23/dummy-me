@@ -3,8 +3,10 @@ module Web.DummyMe.DB (
     , TopLevelKey(..)
     , EntityId(..)
     , Entity(..)
+    , Schema(..)
     , loadDummyDB
     , dumpDummyDB
+    , schema
     , select
     , selectById
     , deleteById

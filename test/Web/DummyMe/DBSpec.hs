@@ -41,6 +41,11 @@ updBobDB   = DummyDB "{ \"users\": [ { \"id\": 1, \"name\": \"Alice\" }, { \"id\
 spec :: Spec
 spec = do
 
+    describe "schema" $ do
+        it "should return two types of keys as the Schema datatype" $ do
+            (pluralKeys . schema) db `shouldBe` ["users"]
+            (singularKeys . schema) db `shouldBe` ["status"]
+
     describe "select" $ do
         context "when the given key has an array of entries" $ do
             it "should return a vector of all entries" $ do

@@ -61,10 +61,10 @@ printLogo = mapM_ putStrLn [
 
 printRoutes :: Config -> DummyDB -> IO ()
 printRoutes appCfg dummyDB = do
-    let sch = schema dummyDB
+    let ks = keySet dummyDB
     putStrLn ""
-    mapM_ (putStrLn . showRoute (port appCfg)) $ pluralKeys sch
-    mapM_ (putStrLn . showRoute (port appCfg)) $ singularKeys sch
+    mapM_ (putStrLn . showRoute (port appCfg)) $ pluralKeys ks
+    mapM_ (putStrLn . showRoute (port appCfg)) $ singularKeys ks
     putStrLn ""
 
 -- TODO: parameterize the host

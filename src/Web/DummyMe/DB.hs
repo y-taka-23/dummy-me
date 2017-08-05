@@ -3,10 +3,10 @@ module Web.DummyMe.DB (
     , TopLevelKey(..)
     , EntityId(..)
     , Entity(..)
-    , Schema(..)
+    , KeySet(..)
     , loadDummyDB
     , dumpDummyDB
-    , schema
+    , keySet
     , select
     , selectById
     , deleteById
@@ -39,7 +39,7 @@ instance Eq DummyDB where
 instance ToJSON DummyDB where
     toJSON (DummyDB db) = fromMaybe (error "unreachable") (decode db)
 
-data Schema = Schema {
+data KeySet = KeySet {
       pluralKeys   :: [TopLevelKey]
     , singularKeys :: [TopLevelKey]
     }
@@ -55,10 +55,10 @@ topLevelKeys (DummyDB db) = case decode db of
     Just (Object obj) -> HM.keys obj
     _                 -> error "unreachable"
 
-schema :: DummyDB -> Schema
-schema dummyDB =
+keySet :: DummyDB -> KeySet
+keySet dummyDB =
     let (ss, ps) = L.partition (isSingular dummyDB) (topLevelKeys dummyDB)
-    in  Schema { pluralKeys = ps, singularKeys = ss }
+    in  KeySet { pluralKeys = ps, singularKeys = ss }
 
 select :: TopLevelKey -> DummyDB -> (DummyDB, Maybe Entity)
 select x (DummyDB db) = (DummyDB db, db ^? key x)

@@ -126,6 +126,18 @@ modifyEntity n ent currents =
         Nothing  -> currents
         Just idx -> currents V.// [(idx, ent)]
 
+-- TODO: more suitable naming
+alter :: TopLevelKey -> Entity -> DummyDB -> (DummyDB, Maybe Entity)
+alter x ent (DummyDB db) = undefined
+
+alterById :: TopLevelKey -> EntityId -> Entity -> DummyDB
+          -> (DummyDB, Maybe Entity)
+alterById x n ent (DummyDB db) = undefined
+
+merge :: Entity -> Entity -> Entity
+merge (Object o1) (Object o2) = Object $ HM.union o1 o2
+merge ent         _           = ent
+
 idOf :: Entity -> Maybe EntityId
 idOf ent = ent ^? key (T.pack "id") . _Integer
 

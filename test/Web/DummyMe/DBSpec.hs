@@ -10,41 +10,42 @@ import           Data.Aeson.Lens
 import qualified Data.Vector       as V
 
 db :: DummyDB
-db = DummyDB "{ \"users\": [ { \"id\": 1, \"name\": \"Alice\" }, { \"id\": 2, \"name\": \"Bob\" } ], \"status\": \"test\" }"
+db = DummyDB "{ \"users\": [ { \"id\": 1, \"name\": \"Alice\" }, { \"id\": 2, \"name\": \"Bob\" } ], \"status\": \"test\", \"admin\": { \"name\":\"John\" } }"
 
 alice, bob :: Entity
 alice = object [ "id" .= Number 1, "name" .= String "Alice" ]
 bob   = object [ "id" .= Number 2, "name" .= String "Bob" ]
 
 delAliceDB, delBobDB :: DummyDB
-delAliceDB = DummyDB "{ \"users\": [ { \"id\": 2, \"name\": \"Bob\" } ], \"status\": \"test\" }"
-delBobDB   = DummyDB "{ \"users\": [ { \"id\": 1, \"name\": \"Alice\" } ], \"status\": \"test\" }"
+delAliceDB = DummyDB "{ \"users\": [ { \"id\": 2, \"name\": \"Bob\" } ], \"status\": \"test\", \"admin\": { \"name\":\"John\" } }"
+delBobDB   = DummyDB "{ \"users\": [ { \"id\": 1, \"name\": \"Alice\" } ], \"status\": \"test\", \"admin\": { \"name\":\"John\" } }"
 
 carol, carolWithoutId :: Entity
 carol          = object [ "id" .= Number 0, "name" .= String "Carol" ]
 carolWithoutId = object [ "name" .= String "Carol" ]
 
 insCarolDB :: DummyDB
-insCarolDB = DummyDB "{ \"users\": [ { \"id\": 1, \"name\": \"Alice\" }, { \"id\": 2, \"name\": \"Bob\" }, { \"id\": 3, \"name\": \"Carol\" } ], \"status\": \"test\" }"
+insCarolDB = DummyDB "{ \"users\": [ { \"id\": 1, \"name\": \"Alice\" }, { \"id\": 2, \"name\": \"Bob\" }, { \"id\": 3, \"name\": \"Carol\" } ], \"status\": \"test\", \"admin\": { \"name\":\"John\" } }"
 
 statusString, statusObject :: Entity
 statusString = String "running"
 statusObject = object [ "prev" .= String "started", "next" .= String "stopped" ]
 
-updStatusStringDB = DummyDB "{ \"users\": [ { \"id\": 1, \"name\": \"Alice\" }, { \"id\": 2, \"name\": \"Bob\" } ], \"status\": \"running\" }"
-updStatusObjectDB = DummyDB "{ \"users\": [ { \"id\": 1, \"name\": \"Alice\" }, { \"id\": 2, \"name\": \"Bob\" } ], \"status\": { \"prev\": \"started\", \"next\": \"stopped\" } }"
+updStatusStringDB = DummyDB "{ \"users\": [ { \"id\": 1, \"name\": \"Alice\" }, { \"id\": 2, \"name\": \"Bob\" } ], \"status\": \"running\", \"admin\": { \"name\":\"John\" } }"
+updStatusObjectDB = DummyDB "{ \"users\": [ { \"id\": 1, \"name\": \"Alice\" }, { \"id\": 2, \"name\": \"Bob\" } ], \"status\": { \"prev\": \"started\", \"next\": \"stopped\", \"admin\": { \"name\":\"John\" } } }"
 
 updAliceDB, updBobDB :: DummyDB
-updAliceDB = DummyDB "{ \"users\": [ { \"id\": 1, \"name\": \"Carol\" }, { \"id\": 2, \"name\": \"Bob\" } ], \"status\": \"test\" }"
-updBobDB   = DummyDB "{ \"users\": [ { \"id\": 1, \"name\": \"Alice\" }, { \"id\": 2, \"name\": \"Carol\" } ], \"status\": \"test\" }"
+updAliceDB = DummyDB "{ \"users\": [ { \"id\": 1, \"name\": \"Carol\" }, { \"id\": 2, \"name\": \"Bob\" } ], \"status\": \"test\", \"admin\": { \"name\":\"John\" } }"
+updBobDB   = DummyDB "{ \"users\": [ { \"id\": 1, \"name\": \"Alice\" }, { \"id\": 2, \"name\": \"Carol\" } ], \"status\": \"test\", \"admin\": { \"name\":\"John\" } }"
 
 spec :: Spec
 spec = do
 
+    -- TODO: it should not be order-sensitive
     describe "keySet" $ do
         it "should return two types of keys as the KeySet datatype" $ do
             (pluralKeys . keySet) db `shouldBe` ["users"]
-            (singularKeys . keySet) db `shouldBe` ["status"]
+            (singularKeys . keySet) db `shouldBe` ["status", "admin"]
 
     describe "select" $ do
         context "when the given key has an array of entries" $ do

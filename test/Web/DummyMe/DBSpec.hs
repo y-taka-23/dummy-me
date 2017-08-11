@@ -32,7 +32,7 @@ statusString = String "running"
 statusObject = object [ "prev" .= String "started", "next" .= String "stopped" ]
 
 updStatusStringDB = DummyDB "{ \"users\": [ { \"id\": 1, \"name\": \"Alice\" }, { \"id\": 2, \"name\": \"Bob\" } ], \"status\": \"running\", \"admin\": { \"name\":\"John\" } }"
-updStatusObjectDB = DummyDB "{ \"users\": [ { \"id\": 1, \"name\": \"Alice\" }, { \"id\": 2, \"name\": \"Bob\" } ], \"status\": { \"prev\": \"started\", \"next\": \"stopped\", \"admin\": { \"name\":\"John\" } } }"
+updStatusObjectDB = DummyDB "{ \"users\": [ { \"id\": 1, \"name\": \"Alice\" }, { \"id\": 2, \"name\": \"Bob\" } ], \"status\": { \"prev\": \"started\", \"next\": \"stopped\" }, \"admin\": { \"name\":\"John\" } }"
 
 updAliceDB, updBobDB :: DummyDB
 updAliceDB = DummyDB "{ \"users\": [ { \"id\": 1, \"name\": \"Carol\" }, { \"id\": 2, \"name\": \"Bob\" } ], \"status\": \"test\", \"admin\": { \"name\":\"John\" } }"

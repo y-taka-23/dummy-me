@@ -21,6 +21,7 @@ import           Data.Aeson
 import           Data.Aeson.Lens
 import qualified Data.ByteString.Lazy   as BS
 import qualified Data.HashMap.Lazy      as HM
+import qualified Data.HashSet           as HS
 import qualified Data.List              as L
 import           Data.Maybe
 import qualified Data.Scientific        as SCI
@@ -40,8 +41,8 @@ instance ToJSON DummyDB where
     toJSON (DummyDB db) = fromMaybe (error "unreachable") (decode db)
 
 data KeySet = KeySet {
-      pluralKeys   :: [TopLevelKey]
-    , singularKeys :: [TopLevelKey]
+      pluralKeys   :: HS.HashSet TopLevelKey
+    , singularKeys :: HS.HashSet TopLevelKey
     }
 
 loadDummyDB :: FilePath -> IO DummyDB
@@ -58,7 +59,7 @@ topLevelKeys (DummyDB db) = case decode db of
 keySet :: DummyDB -> KeySet
 keySet dummyDB =
     let (ss, ps) = L.partition (isSingular dummyDB) (topLevelKeys dummyDB)
-    in  KeySet { pluralKeys = ps, singularKeys = ss }
+    in  KeySet { pluralKeys = HS.fromList ps, singularKeys = HS.fromList ss }
 
 select :: TopLevelKey -> DummyDB -> (DummyDB, Maybe Entity)
 select x (DummyDB db) = (DummyDB db, db ^? key x)

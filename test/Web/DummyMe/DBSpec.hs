@@ -7,6 +7,7 @@ import Web.DummyMe.DB
 import           Control.Lens      hiding ( (.=) )
 import           Data.Aeson
 import           Data.Aeson.Lens
+import qualified Data.HashSet      as HS
 import qualified Data.Vector       as V
 
 db :: DummyDB
@@ -44,8 +45,8 @@ spec = do
     -- TODO: it should not be order-sensitive
     describe "keySet" $ do
         it "should return two types of keys as the KeySet datatype" $ do
-            (pluralKeys . keySet) db `shouldBe` ["users"]
-            (singularKeys . keySet) db `shouldBe` ["status", "admin"]
+            (pluralKeys . keySet) db `shouldBe` HS.fromList ["users"]
+            (singularKeys . keySet) db `shouldBe` HS.fromList ["status", "admin"]
 
     describe "select" $ do
         context "when the given key has an array of entries" $ do

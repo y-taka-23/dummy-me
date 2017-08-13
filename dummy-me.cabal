@@ -55,5 +55,6 @@ test-suite hspec
                      , vector
                      , lens
                      , lens-aeson
+                     , unordered-containers
   ghc-options:         -threaded -rtsopts -with-rtsopts=-N
   default-language:    Haskell2010

@@ -39,6 +39,13 @@ updAliceDB, updBobDB :: DummyDB
 updAliceDB = DummyDB "{ \"users\": [ { \"id\": 1, \"name\": \"Carol\" }, { \"id\": 2, \"name\": \"Bob\" } ], \"status\": \"test\", \"admin\": { \"name\":\"John\" } }"
 updBobDB   = DummyDB "{ \"users\": [ { \"id\": 1, \"name\": \"Alice\" }, { \"id\": 2, \"name\": \"Carol\" } ], \"status\": \"test\", \"admin\": { \"name\":\"John\" } }"
 
+adminEmail, adminAltered :: Entity
+adminEmail   = object [                          "email" .= String "john@example.com" ]
+adminAltered = object [ "name" .= String "John", "email" .= String "john@example.com" ]
+
+altAdminDB :: DummyDB
+altAdminDB = DummyDB "{ \"users\": [ { \"id\": 1, \"name\": \"Alice\" }, { \"id\": 2, \"name\": \"Bob\" } ], \"status\": \"test\", \"admin\": { \"name\":\"John\", \"email\":\"john@example.com\" } }"
+
 spec :: Spec
 spec = do
 
@@ -156,6 +163,26 @@ spec = do
         context "when the given key has no entry" $ do
             it "should do nothing and return the original DB" $ do
                 updateById "other" 1 statusString db `shouldBe` (db, Nothing)
+
+    describe "alter" $ do
+        -- TODO: add a test case for overwriting
+        context "when the given key has a single Object entry" $ do
+            it "should merge the entries, overwriting if necessary" $ do
+                let (newDB, Just entity) = alter "admin" adminEmail db
+                newDB `shouldBe` altAdminDB
+                entity `shouldBe` adminAltered
+        context "when the given key has a single non-Object entry" $ do
+            it "should replace the entry with now one" $ do
+                alter "status"  statusString db
+                    `shouldBe` update "status" statusString db
+                alter "status"  statusObject db
+                    `shouldBe` update "status" statusObject db
+        context "when the given key has an array of entries" $ do
+            it "should do nothing and return the original DB" $ do
+                alter "users" adminAltered db `shouldBe` (db, Nothing)
+        context "when the given key has no entry" $  do
+            it "should do nothing and return the original DB" $ do
+                alter "other" adminAltered db `shouldBe` (db, Nothing)
 
     describe "idOf" $ do
         context "when the given entry has the 'id' field" $ do

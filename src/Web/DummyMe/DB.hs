@@ -13,6 +13,8 @@ module Web.DummyMe.DB (
     , insert
     , update
     , updateById
+    , alter
+    , alterById
     , idOf
     ) where
 

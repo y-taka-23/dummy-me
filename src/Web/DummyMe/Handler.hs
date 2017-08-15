@@ -102,6 +102,17 @@ putByIdHandler key id = do
         Nothing -> errorHandler notFound404
         Just _ -> setStatus noContent204 >> json ""
 
+patchHandler :: (SpockState (ActionCtxT ctx m) ~ AppState,
+                 HasSpock (ActionCtxT ctx m), MonadIO m) =>
+             TopLevelKey -> ActionCtxT ctx m b
+patchHandler key = do
+    entry <- jsonBody' -- returns 400 on parsing error
+    dbRef <- inMemoryDB <$> getState
+    mPatched <- liftIO $ atomicModifyIORef' dbRef (alter key entry)
+    case mPatched of
+        Nothing -> errorHandler notFound404
+        Just _ -> setStatus noContent204 >> json ""
+
 -- TODO: create JSON templates for each status
 errorHandler :: (MonadIO m) => Status -> ActionCtxT ctx m b
 errorHandler status = setStatus status >> json ""

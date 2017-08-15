@@ -130,8 +130,13 @@ modifyEntity n ent currents =
         Just idx -> currents V.// [(idx, ent)]
 
 -- TODO: more suitable naming
+-- TODO: the logic traverses the DB string twice
 alter :: TopLevelKey -> Entity -> DummyDB -> (DummyDB, Maybe Entity)
-alter x ent (DummyDB db) = undefined
+alter x ent (DummyDB db)
+    | isSingular (DummyDB db) x = (DummyDB newDB, newDB ^? key x)
+    | otherwise                 = (DummyDB db, Nothing)
+    where
+        newDB = db & key x %~ merge ent
 
 alterById :: TopLevelKey -> EntityId -> Entity -> DummyDB
           -> (DummyDB, Maybe Entity)

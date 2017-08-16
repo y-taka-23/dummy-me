@@ -184,6 +184,28 @@ spec = do
             it "should do nothing and return the original DB" $ do
                 alter "other" adminAltered db `shouldBe` (db, Nothing)
 
+    describe "alterById" $ do
+        context "when the given key has an entry of the given id" $ do
+            it "should update the entry partially" $ do
+                let (newDB, Just entry) = alterById "users" 1 adminEmail db
+                newDB `shouldBe` altAliceDB
+                idOf entry `shouldBe` Just 1
+                entry ^? key "name" `shouldBe` alice ^? key "name"
+                entry ^? key "email" `shouldBe` adminEmail ^? key "email"
+        context "when 'id' is specified in the given entry" $ do
+            it "should ignore the 'id' and keep the original one" $ do
+                alterById "users" 1 carol db
+                    `shouldBe` updateById "users" 1 carol db
+        context "when there is no entry of the given id" $ do
+            it "should do nothing and return the original DB" $ do
+                alterById "users" 3 adminEmail db `shouldBe` (db, Nothing)
+        context "when the given key has non-array enttry" $ do
+            it "should do nothing and return the original DB" $ do
+                alterById "status" 1 statusString db `shouldBe` (db, Nothing)
+        context "when the given key has no entry" $ do
+            it "should do nothing and return the original DB" $ do
+                alterById "other" 1 statusString db `shouldBe` (db, Nothing)
+
     describe "idOf" $ do
         context "when the given entry has the 'id' field" $ do
             it "should return the value" $ do

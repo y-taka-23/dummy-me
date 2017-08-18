@@ -43,8 +43,9 @@ adminEmail, adminAltered :: Entity
 adminEmail   = object [                          "email" .= String "john@example.com" ]
 adminAltered = object [ "name" .= String "John", "email" .= String "john@example.com" ]
 
-altAdminDB :: DummyDB
+altAdminDB, altAliceDB :: DummyDB
 altAdminDB = DummyDB "{ \"users\": [ { \"id\": 1, \"name\": \"Alice\" }, { \"id\": 2, \"name\": \"Bob\" } ], \"status\": \"test\", \"admin\": { \"name\":\"John\", \"email\":\"john@example.com\" } }"
+altAliceDB = DummyDB "{ \"users\": [ { \"id\": 1, \"name\": \"Alice\",\"email\": \"john@example.com\" }, { \"id\": 2, \"name\": \"Bob\" } ], \"status\": \"test\", \"admin\": { \"name\":\"John\" } }"
 
 spec :: Spec
 spec = do

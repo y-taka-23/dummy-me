@@ -9,6 +9,7 @@ module Web.DummyMe.Handler (
     , postHandler
     , putHandler
     , putByIdHandler
+    , patchHandler
     , errorHandler
     , getDBHandler
     , postSnapshotHandler

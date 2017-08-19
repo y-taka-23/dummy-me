@@ -48,6 +48,7 @@ routes = do
     put     var           $ \key    -> putHandler key
     put    (var <//> var) $ \key id -> putByIdHandler key id
     patch   var           $ \key    -> patchHandler key
+    patch  (var <//> var) $ \key id -> patchByIdHandler key id
 
 printLogo :: IO ()
 printLogo = mapM_ putStrLn [

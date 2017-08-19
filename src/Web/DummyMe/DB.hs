@@ -84,7 +84,7 @@ insert x ent (DummyDB db) =
     case nextId <$> db ^? key x . _Array of
         Nothing -> (DummyDB db, Nothing)
         Just newId ->
-            let newEnt = ent & _Object %~ setId newId
+            let newEnt = setId newId ent
             in  ( DummyDB $ db & key x . _Array %~ appendEntity newEnt
                 , Just newEnt
                 )
@@ -92,8 +92,9 @@ insert x ent (DummyDB db) =
 appendEntity :: Entity -> V.Vector Entity -> V.Vector Entity
 appendEntity = flip V.snoc
 
-setId :: EntityId -> Object -> Object
-setId n = HM.insert (T.pack "id") (toJSON n)
+setId :: EntityId -> Entity -> Entity
+setId n (Object obj) = Object $ HM.insert (T.pack "id") (toJSON n) obj
+setId _ ent          = ent
 
 nextId :: V.Vector Entity -> EntityId
 nextId currents =
@@ -120,7 +121,7 @@ updateById x n ent (DummyDB db)
     | DummyDB newDB == DummyDB db = (DummyDB db, Nothing)
     | otherwise   = (DummyDB newDB, Just newEnt)
     where
-        newEnt = ent & _Object %~ setId n
+        newEnt = setId n ent
         newDB  = db & key x . _Array %~ modifyEntity n newEnt
 
 modifyEntity :: EntityId -> Entity -> V.Vector Entity -> V.Vector Entity
@@ -140,11 +141,24 @@ alter x ent (DummyDB db)
 
 alterById :: TopLevelKey -> EntityId -> Entity -> DummyDB
           -> (DummyDB, Maybe Entity)
-alterById x n ent (DummyDB db) = undefined
+alterById x n ent (DummyDB db)
+    | DummyDB newDB == DummyDB db = (DummyDB db, Nothing)
+    | otherwise = (DummyDB newDB, mNewEnt)
+    where
+        newDB = db & key x . _Array %~ mergeById n ent
+        (_, mNewEnt) = selectById x n (DummyDB newDB)
 
 merge :: Entity -> Entity -> Entity
 merge (Object o1) (Object o2) = Object $ HM.union o1 o2
 merge ent         _           = ent
+
+mergeById :: EntityId -> Entity -> V.Vector Entity -> V.Vector Entity
+mergeById n ent currents =
+    case V.findIndex (idIs n) currents of
+        Nothing -> currents
+        Just idx -> currents V.// [(idx, merged)]
+            where
+                merged = setId n $ merge ent (currents V.! idx)
 
 idOf :: Entity -> Maybe EntityId
 idOf ent = ent ^? key (T.pack "id") . _Integer

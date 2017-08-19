@@ -10,6 +10,7 @@ module Web.DummyMe.Handler (
     , putHandler
     , putByIdHandler
     , patchHandler
+    , patchByIdHandler
     , errorHandler
     , getDBHandler
     , postSnapshotHandler
@@ -111,6 +112,17 @@ patchHandler key = do
     dbRef <- inMemoryDB <$> getState
     mPatched <- liftIO $ atomicModifyIORef' dbRef (alter key entry)
     case mPatched of
+        Nothing -> errorHandler notFound404
+        Just _ -> setStatus noContent204 >> json ""
+
+patchByIdHandler :: (SpockState (ActionCtxT ctx m) ~ AppState,
+                   HasSpock (ActionCtxT ctx m), MonadIO m) =>
+               TopLevelKey -> EntityId -> ActionCtxT ctx m b
+patchByIdHandler key id = do
+    entry <- jsonBody' -- returns 400 on parsing error
+    dbRef <- inMemoryDB <$> getState
+    mUpdated <- liftIO $ atomicModifyIORef' dbRef (alterById key id entry)
+    case mUpdated of
         Nothing -> errorHandler notFound404
         Just _ -> setStatus noContent204 >> json ""
 

@@ -7,6 +7,7 @@ import Web.DummyMe.DB
 import Web.DummyMe.Config
 import Web.DummyMe.Handler
 
+import           Control.Monad
 import           Data.IORef
 import           Data.Text        as T
 import           Data.Version
@@ -22,14 +23,17 @@ runDummyMe appCfg =
     then do
         putStrLn $ "DummyMe " ++ showVersion Paths_dummy_me.version
     else do
-        printLogo
-        putStrLn $ "Laoding database from " ++ file appCfg
+        when (not $ quiet appCfg) $ do
+            printLogo
+            putStrLn $ "Laoding database from " ++ file appCfg
         dummyDB <- loadDummyDB $ file appCfg
-        printRoutes appCfg dummyDB
+        when (not $ quiet appCfg) $ do
+            printRoutes appCfg dummyDB
         createDirectoryIfMissing True $ snapshots appCfg
         spockCfg <- mkSpockCfg appCfg dummyDB
+        let logger = if quiet appCfg then id else logStdoutDev
         runSpockNoBanner (port appCfg) $
-            fmap (logStdoutDev .) $ spock spockCfg routes
+            fmap (logger .) $ spock spockCfg routes
 
 mkSpockCfg :: Config -> DummyDB -> IO (SpockCfg () () AppState)
 mkSpockCfg appCfg initDB = do

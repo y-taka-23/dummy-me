@@ -8,6 +8,7 @@ import Options.Applicative
 data Config = Config {
       file      :: FilePath
     , port      :: Int
+    , quiet     :: Bool
     , snapshots :: FilePath
     , version   :: Bool
     }
@@ -35,6 +36,12 @@ portP = option auto $ mconcat [
     , showDefault
     ]
 
+quietP :: Parser Bool
+quietP = switch $ mconcat [
+      long "quiet"
+    , help "Suppress log messages"
+    ]
+
 snapshotsP :: Parser String
 snapshotsP = option str $ mconcat [
       long "snapshots"
@@ -52,7 +59,14 @@ versionP = switch $ mconcat [
     ]
 
 configP :: Parser Config
-configP = helper <*> (Config <$> fileP <*> portP <*> snapshotsP <*> versionP)
+configP = helper <*> (
+        Config
+    <$> fileP
+    <*> portP
+    <*> quietP
+    <*> snapshotsP
+    <*> versionP
+    )
 
 configParserInfo :: ParserInfo Config
 configParserInfo = info configP $ mconcat [

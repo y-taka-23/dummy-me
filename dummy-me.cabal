@@ -36,6 +36,7 @@ library
                      , wai-extra
                      , unix
                      , directory
+                     , filepath
 
 executable dummy-me
   hs-source-dirs:      app

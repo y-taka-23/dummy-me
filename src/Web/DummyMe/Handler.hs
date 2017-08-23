@@ -24,6 +24,7 @@ import           Data.IORef
 import           Data.Maybe
 import qualified Data.Text                  as T
 import           Network.HTTP.Types.Status
+import           System.FilePath.Posix
 import           System.Posix
 import           Web.Spock
 
@@ -163,7 +164,7 @@ postSnapshotHandler = do
         dumpDummyDB (snapshotFilePath (config appState) time) db
     setStatus noContent204 >> json ""
 
--- TODO: better way of building the path
 snapshotFilePath :: Config -> EpochTime -> FilePath
-snapshotFilePath appCfg time =
-    snapshots appCfg ++ "/snapshot-" ++ show time ++ ".json"
+snapshotFilePath appCfg time = addExtension snapshotName "json"
+    where
+        snapshotName = snapshots appCfg </> "snapshot-" ++ show time

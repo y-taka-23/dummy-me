@@ -47,6 +47,10 @@ data KeySet = KeySet {
     , singularKeys :: HS.HashSet TopLevelKey
     }
 
+data QueryError =
+      NoResult
+    | KeyTypeMismatch
+
 loadDummyDB :: FilePath -> IO DummyDB
 loadDummyDB fp = DummyDB <$> BS.readFile fp
 

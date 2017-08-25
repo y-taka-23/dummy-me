@@ -50,7 +50,6 @@ altAliceDB = DummyDB "{ \"users\": [ { \"id\": 1, \"name\": \"Alice\",\"email\":
 spec :: Spec
 spec = do
 
-    -- TODO: it should not be order-sensitive
     describe "keySet" $ do
         it "should return two types of keys as the KeySet datatype" $ do
             (pluralKeys . keySet) db `shouldBe` HS.fromList ["users"]

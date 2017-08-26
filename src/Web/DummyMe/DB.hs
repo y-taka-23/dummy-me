@@ -4,6 +4,7 @@ module Web.DummyMe.DB (
     , EntityId(..)
     , Entity(..)
     , KeySet(..)
+    , QueryError(..)
     , loadDummyDB
     , dumpDummyDB
     , keySet
@@ -68,8 +69,10 @@ keySet dummyDB =
     let (ss, ps) = L.partition (isSingular dummyDB) (topLevelKeys dummyDB)
     in  KeySet { pluralKeys = HS.fromList ps, singularKeys = HS.fromList ss }
 
-select :: TopLevelKey -> DummyDB -> (DummyDB, Maybe Entity)
-select x (DummyDB db) = (DummyDB db, db ^? key x)
+select :: TopLevelKey -> DummyDB -> (DummyDB, Either QueryError Entity)
+select x (DummyDB db) = case db ^? key x of
+    Nothing  -> (DummyDB db, Left NoSuchEntity)
+    Just ent -> (DummyDB db, Right ent)
 
 -- TODO: It doen't go when there are multiple entities of the specified id
 selectById :: TopLevelKey -> EntityId -> DummyDB -> (DummyDB, Maybe Entity)

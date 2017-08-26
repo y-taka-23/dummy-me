@@ -59,13 +59,13 @@ spec = do
         context "when the given key has an array of entries" $ do
             it "should return a vector of all entries" $ do
                 select "users" db `shouldBe`
-                    (db, Just (Array (alice `V.cons` V.singleton bob)))
+                    (db, Right (Array (alice `V.cons` V.singleton bob)))
         context "when the given key has a non-array entry" $ do
             it "should return a single entry" $ do
-                select "status" db `shouldBe` (db, Just (String "test"))
+                select "status" db `shouldBe` (db, Right (String "test"))
         context "when the given key has no entry" $ do
-            it "should return Nothing" $ do
-                select "other" db `shouldBe` (db, Nothing)
+            it "should return NoSuchEntity" $ do
+                select "other" db `shouldBe` (db, Left NoSuchEntity)
 
     describe "selectById" $ do
         context "when the given key has an entry of the given id" $ do

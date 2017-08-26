@@ -46,8 +46,9 @@ getHandler key = do
     dbRef <- inMemoryDB <$> getState
     db <- liftIO $ readIORef dbRef
     case select key db of
-        (_, Nothing) -> errorHandler notFound404
-        (_, Just ent) -> json ent
+        (_, Left NoSuchEntity)    -> errorHandler notFound404
+        (_, Left KeyTypeMismatch) -> error "unreachable"
+        (_, Right ent)            -> json ent
 
 getByIdHandler :: (SpockState (ActionCtxT ctx m) ~ AppState,
                    HasSpock (ActionCtxT ctx m), MonadIO m) =>

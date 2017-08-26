@@ -48,8 +48,9 @@ data KeySet = KeySet {
     }
 
 data QueryError =
-      NoResult
+      NoSuchEntity
     | KeyTypeMismatch
+    deriving ( Eq, Show )
 
 loadDummyDB :: FilePath -> IO DummyDB
 loadDummyDB fp = DummyDB <$> BS.readFile fp

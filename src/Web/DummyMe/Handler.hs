@@ -62,13 +62,13 @@ getByIdHandler key id = do
 
 deleteByIdHandler :: (SpockState (ActionCtxT ctx m) ~ AppState,
                       HasSpock (ActionCtxT ctx m), MonadIO m) =>
-                  TopLevelKey -> EntityId -> ActionCtxT ctx m b
+                  TopLevelKey -> EntityId -> ActionCtxT ctx m ()
 deleteByIdHandler key id = do
     dbRef <- inMemoryDB <$> getState
     mDeleted <- liftIO $ atomicModifyIORef' dbRef (deleteById key id)
     case mDeleted of
         Nothing -> errorHandler notFound404
-        Just _ -> setStatus noContent204 >> json ""
+        Just _ -> setStatus noContent204
 
 postHandler :: (SpockState (ActionCtxT ctx m) ~ AppState,
                 HasSpock (ActionCtxT ctx m), MonadIO m) =>
@@ -86,47 +86,47 @@ postHandler key = do
 
 putHandler :: (SpockState (ActionCtxT ctx m) ~ AppState,
                HasSpock (ActionCtxT ctx m), MonadIO m) =>
-           TopLevelKey -> ActionCtxT ctx m b
+           TopLevelKey -> ActionCtxT ctx m ()
 putHandler key = do
     entry <- jsonBody' -- returns 400 on parsing error
     dbRef <- inMemoryDB <$> getState
     mUpdated <- liftIO $ atomicModifyIORef' dbRef (update key entry)
     case mUpdated of
         Nothing -> errorHandler notFound404
-        Just _ -> setStatus noContent204 >> json ""
+        Just _ -> setStatus noContent204
 
 putByIdHandler :: (SpockState (ActionCtxT ctx m) ~ AppState,
                    HasSpock (ActionCtxT ctx m), MonadIO m) =>
-               TopLevelKey -> EntityId -> ActionCtxT ctx m b
+               TopLevelKey -> EntityId -> ActionCtxT ctx m ()
 putByIdHandler key id = do
     entry <- jsonBody' -- returns 400 on parsing error
     dbRef <- inMemoryDB <$> getState
     mUpdated <- liftIO $ atomicModifyIORef' dbRef (updateById key id entry)
     case mUpdated of
         Nothing -> errorHandler notFound404
-        Just _ -> setStatus noContent204 >> json ""
+        Just _ -> setStatus noContent204
 
 patchHandler :: (SpockState (ActionCtxT ctx m) ~ AppState,
                  HasSpock (ActionCtxT ctx m), MonadIO m) =>
-             TopLevelKey -> ActionCtxT ctx m b
+             TopLevelKey -> ActionCtxT ctx m ()
 patchHandler key = do
     entry <- jsonBody' -- returns 400 on parsing error
     dbRef <- inMemoryDB <$> getState
     mPatched <- liftIO $ atomicModifyIORef' dbRef (alter key entry)
     case mPatched of
         Nothing -> errorHandler notFound404
-        Just _ -> setStatus noContent204 >> json ""
+        Just _ -> setStatus noContent204
 
 patchByIdHandler :: (SpockState (ActionCtxT ctx m) ~ AppState,
                    HasSpock (ActionCtxT ctx m), MonadIO m) =>
-               TopLevelKey -> EntityId -> ActionCtxT ctx m b
+               TopLevelKey -> EntityId -> ActionCtxT ctx m ()
 patchByIdHandler key id = do
     entry <- jsonBody' -- returns 400 on parsing error
     dbRef <- inMemoryDB <$> getState
     mUpdated <- liftIO $ atomicModifyIORef' dbRef (alterById key id entry)
     case mUpdated of
         Nothing -> errorHandler notFound404
-        Just _ -> setStatus noContent204 >> json ""
+        Just _ -> setStatus noContent204
 
 -- TODO: create JSON templates for each status
 errorHandler :: (MonadIO m) => Status -> ActionCtxT ctx m b
@@ -156,14 +156,14 @@ getDBHandler = do
 
 postSnapshotHandler :: (SpockState (ActionCtxT ctx m) ~ AppState,
                         HasSpock (ActionCtxT ctx m), MonadIO m) =>
-                    ActionCtxT ctx m b
+                    ActionCtxT ctx m ()
 postSnapshotHandler = do
     appState <- getState
     liftIO $ do
         time <- epochTime
         db <- readIORef $ inMemoryDB appState
         dumpDummyDB (snapshotFilePath (config appState) time) db
-    setStatus noContent204 >> json ""
+    setStatus noContent204
 
 snapshotFilePath :: Config -> EpochTime -> FilePath
 snapshotFilePath appCfg time = addExtension snapshotName "json"

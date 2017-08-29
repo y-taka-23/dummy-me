@@ -85,17 +85,17 @@ spec = do
     describe "deleteById" $ do
         context "when the given key has an entry of the given id" $ do
             it "should return a pair of the new DB and the deleted entry" $ do
-                deleteById "users" 1 db `shouldBe` (delAliceDB, Just alice)
-                deleteById "users" 2 db `shouldBe` (delBobDB, Just bob)
+                deleteById "users" 1 db `shouldBe` (delAliceDB, Right alice)
+                deleteById "users" 2 db `shouldBe` (delBobDB, Right bob)
         context "when the give key has no entry of the given id" $ do
-            it "should return a pair of the original DB and Nothing" $ do
-                deleteById "users" 3 db `shouldBe` (db, Nothing)
+            it "should return a pair of the original DB and NoSuchEntity" $ do
+                deleteById "users" 3 db `shouldBe` (db, Left NoSuchEntity)
         context "when the given key has a non-array entry" $ do
-            it "should return a pair of the original DB and Nothing" $ do
-                deleteById "status" 1 db `shouldBe` (db, Nothing)
+            it "should return a pair of the original DB and KeyTypeMismatch" $ do
+                deleteById "status" 1 db `shouldBe` (db, Left KeyTypeMismatch)
         context "when the given key has no entry" $ do
-            it "should return a pair of the original DB and Nothing" $ do
-                deleteById "other" 1 db `shouldBe` (db, Nothing)
+            it "should return a pair of the original DB and NoSuchEntity" $ do
+                deleteById "other" 1 db `shouldBe` (db, Left NoSuchEntity)
 
     -- TODO: these test cases are fragile, i.e. depend on the numbering logic
     -- TODO: check that the numbering has no duplication

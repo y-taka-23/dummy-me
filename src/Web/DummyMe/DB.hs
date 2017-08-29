@@ -79,10 +79,15 @@ selectById :: TopLevelKey -> EntityId -> DummyDB -> (DummyDB, Maybe Entity)
 selectById x n (DummyDB db) =
     (DummyDB db, db ^? key x . _Array . traverse . filtered (idIs n))
 
-deleteById :: TopLevelKey -> EntityId -> DummyDB -> (DummyDB, Maybe Entity)
-deleteById x n (DummyDB db) =
-    let (_, mDeletedEntity) = selectById x n (DummyDB db)
-    in  (DummyDB $ db & key x . _Array %~ purgeEntity n, mDeletedEntity)
+deleteById :: TopLevelKey -> EntityId -> DummyDB
+           -> (DummyDB, Either QueryError Entity)
+deleteById x n (DummyDB db)
+    | isSingular (DummyDB db) x = (DummyDB db, Left KeyTypeMismatch)
+    | isPlural   (DummyDB db) x = case selectById x n (DummyDB db) of
+        (_, Nothing)  -> (DummyDB db, Left NoSuchEntity)
+        (_, Just ent) -> (DummyDB newDB, Right ent)
+            where newDB = db & key x . _Array %~ purgeEntity n
+    | otherwise                 = (DummyDB db, Left NoSuchEntity)
 
 purgeEntity :: EntityId -> V.Vector Entity -> V.Vector Entity
 purgeEntity n = V.filter (not . idIs n)
@@ -122,6 +127,11 @@ isSingular (DummyDB db) x = case db ^? key x of
     Just (Array _) -> False
     Just _         -> True
     Nothing        -> False
+
+isPlural :: DummyDB -> TopLevelKey -> Bool
+isPlural (DummyDB db) x = case db ^? key x of
+    Just (Array _) -> True
+    _              -> False
 
 updateById :: TopLevelKey -> EntityId -> Entity -> DummyDB
            -> (DummyDB, Maybe Entity)

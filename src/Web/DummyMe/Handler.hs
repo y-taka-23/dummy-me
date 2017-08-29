@@ -65,10 +65,11 @@ deleteByIdHandler :: (SpockState (ActionCtxT ctx m) ~ AppState,
                   TopLevelKey -> EntityId -> ActionCtxT ctx m ()
 deleteByIdHandler key id = do
     dbRef <- inMemoryDB <$> getState
-    mDeleted <- liftIO $ atomicModifyIORef' dbRef (deleteById key id)
-    case mDeleted of
-        Nothing -> errorHandler notFound404
-        Just _ -> setStatus noContent204
+    eResult <- liftIO $ atomicModifyIORef' dbRef (deleteById key id)
+    case eResult of
+        Left NoSuchEntity    -> errorHandler notFound404
+        Left KeyTypeMismatch -> errorHandler badRequest400
+        Right _              -> setStatus noContent204
 
 postHandler :: (SpockState (ActionCtxT ctx m) ~ AppState,
                 HasSpock (ActionCtxT ctx m), MonadIO m) =>

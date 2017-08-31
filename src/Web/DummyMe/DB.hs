@@ -117,10 +117,12 @@ nextId currents =
             Left _  -> 1
             Right n -> n + 1
 
-update :: TopLevelKey -> Entity -> DummyDB -> (DummyDB, Maybe Entity)
+update :: TopLevelKey -> Entity -> DummyDB
+       -> (DummyDB, Either QueryError Entity)
 update x ent (DummyDB db)
-    | isSingular (DummyDB db) x = (DummyDB $ db & key x .~ ent, Just ent)
-    | otherwise                 = (DummyDB db, Nothing)
+    | isSingular (DummyDB db) x = (DummyDB $ db & key x .~ ent, Right ent)
+    | isPlural   (DummyDB db) x = (DummyDB db, Left KeyTypeMismatch)
+    | otherwise                 = (DummyDB db, Left NoSuchEntity)
 
 isSingular :: DummyDB -> TopLevelKey -> Bool
 isSingular (DummyDB db) x = case db ^? key x of

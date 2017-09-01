@@ -75,17 +75,24 @@ select x (DummyDB db) = case db ^? key x of
     Just ent -> (DummyDB db, Right ent)
 
 -- TODO: It doen't go when there are multiple entities of the specified id
-selectById :: TopLevelKey -> EntityId -> DummyDB -> (DummyDB, Maybe Entity)
-selectById x n (DummyDB db) =
-    (DummyDB db, db ^? key x . _Array . traverse . filtered (idIs n))
+selectById :: TopLevelKey -> EntityId -> DummyDB
+           -> (DummyDB, Either QueryError Entity)
+selectById x n (DummyDB db)
+    | isSingular (DummyDB db) x = (DummyDB db, Left KeyTypeMismatch)
+    | isPlural   (DummyDB db) x =
+        case db ^? key x . _Array . traverse . filtered (idIs n) of
+            Nothing  -> (DummyDB db, Left NoSuchEntity)
+            Just ent -> (DummyDB db, Right ent)
+    | otherwise                 = (DummyDB db, Left NoSuchEntity)
 
 deleteById :: TopLevelKey -> EntityId -> DummyDB
            -> (DummyDB, Either QueryError Entity)
 deleteById x n (DummyDB db)
     | isSingular (DummyDB db) x = (DummyDB db, Left KeyTypeMismatch)
     | isPlural   (DummyDB db) x = case selectById x n (DummyDB db) of
-        (_, Nothing)  -> (DummyDB db, Left NoSuchEntity)
-        (_, Just ent) -> (DummyDB newDB, Right ent)
+        (_, Left NoSuchEntity)    -> (DummyDB db, Left NoSuchEntity)
+        (_, Left KeyTypeMismatch) -> (DummyDB db, Left KeyTypeMismatch)
+        (_, Right ent )           -> (DummyDB newDB, Right ent)
             where newDB = db & key x . _Array %~ purgeEntity n
     | otherwise                 = (DummyDB db, Left NoSuchEntity)
 
@@ -165,8 +172,10 @@ alterById x n ent (DummyDB db)
     | DummyDB newDB == DummyDB db = (DummyDB db, Nothing)
     | otherwise = (DummyDB newDB, mNewEnt)
     where
-        newDB = db & key x . _Array %~ mergeById n ent
-        (_, mNewEnt) = selectById x n (DummyDB newDB)
+        newDB   = db & key x . _Array %~ mergeById n ent
+        mNewEnt = case selectById x n (DummyDB newDB) of
+            (_, Left _)    -> Nothing
+            (_, Right ent) -> Just ent
 
 merge :: Entity -> Entity -> Entity
 merge (Object o1) (Object o2) = Object $ HM.union o1 o2

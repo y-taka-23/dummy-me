@@ -57,8 +57,9 @@ getByIdHandler key id = do
     dbRef <- inMemoryDB <$> getState
     db <- liftIO $ readIORef dbRef
     case selectById key id db of
-        (_, Nothing) -> errorHandler notFound404
-        (_, Just ent) -> json ent
+        (_, Left NoSuchEntity)    -> errorHandler notFound404
+        (_, Left KeyTypeMismatch) -> errorHandler badRequest400
+        (_, Right ent)            -> json ent
 
 deleteByIdHandler :: (SpockState (ActionCtxT ctx m) ~ AppState,
                       HasSpock (ActionCtxT ctx m), MonadIO m) =>

@@ -104,10 +104,11 @@ putByIdHandler :: (SpockState (ActionCtxT ctx m) ~ AppState,
 putByIdHandler key id = do
     entry <- jsonBody' -- returns 400 on parsing error
     dbRef <- inMemoryDB <$> getState
-    mUpdated <- liftIO $ atomicModifyIORef' dbRef (updateById key id entry)
-    case mUpdated of
-        Nothing -> errorHandler notFound404
-        Just _ -> setStatus noContent204
+    eResult <- liftIO $ atomicModifyIORef' dbRef (updateById key id entry)
+    case eResult of
+        Left NoSuchEntity    -> errorHandler notFound404
+        Left KeyTypeMismatch -> errorHandler badRequest400
+        Right _              -> setStatus noContent204
 
 patchHandler :: (SpockState (ActionCtxT ctx m) ~ AppState,
                  HasSpock (ActionCtxT ctx m), MonadIO m) =>

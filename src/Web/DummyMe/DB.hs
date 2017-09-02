@@ -143,13 +143,16 @@ isPlural (DummyDB db) x = case db ^? key x of
     _              -> False
 
 updateById :: TopLevelKey -> EntityId -> Entity -> DummyDB
-           -> (DummyDB, Maybe Entity)
+           -> (DummyDB, Either QueryError Entity)
 updateById x n ent (DummyDB db)
-    | DummyDB newDB == DummyDB db = (DummyDB db, Nothing)
-    | otherwise   = (DummyDB newDB, Just newEnt)
-    where
-        newEnt = setId n ent
-        newDB  = db & key x . _Array %~ modifyEntity n newEnt
+    | isSingular (DummyDB db) x = (DummyDB db, Left KeyTypeMismatch)
+    | isPlural   (DummyDB db) x = case selectById x n (DummyDB db) of
+        (_, Left err)  -> (DummyDB db, Left err)
+        (_, Right ent) -> (DummyDB newDB, Right newEnt)
+            where
+                newEnt = setId n ent
+                newDB  = db & key x . _Array %~ modifyEntity n newEnt
+    | otherwise                 = (DummyDB db, Left NoSuchEntity)
 
 modifyEntity :: EntityId -> Entity -> V.Vector Entity -> V.Vector Entity
 modifyEntity n ent currents =

@@ -147,8 +147,8 @@ updateById :: TopLevelKey -> EntityId -> Entity -> DummyDB
 updateById x n ent (DummyDB db)
     | isSingular (DummyDB db) x = (DummyDB db, Left KeyTypeMismatch)
     | isPlural   (DummyDB db) x = case selectById x n (DummyDB db) of
-        (_, Left err)  -> (DummyDB db, Left err)
-        (_, Right ent) -> (DummyDB newDB, Right newEnt)
+        (_, Left err) -> (DummyDB db, Left err)
+        (_, Right _)  -> (DummyDB newDB, Right newEnt)
             where
                 newEnt = setId n ent
                 newDB  = db & key x . _Array %~ modifyEntity n newEnt

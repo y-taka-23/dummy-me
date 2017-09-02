@@ -88,7 +88,7 @@ spec = do
                 deleteById "users" 1 db `shouldBe` (delAliceDB, Right alice)
                 deleteById "users" 2 db `shouldBe` (delBobDB, Right bob)
         context "when the give key has no entry of the given id" $ do
-            it "should return a pair of the original DB and NoSuchEntity" $ do
+            it "should return a pair of the original db and NoSuchEntity" $ do
                 deleteById "users" 3 db `shouldBe` (db, Left NoSuchEntity)
         context "when the given key has a non-array entry" $ do
             it "should return a pair of the original DB and KeyTypeMismatch" $ do

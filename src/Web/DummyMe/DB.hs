@@ -162,12 +162,14 @@ modifyEntity n ent currents =
 
 -- TODO: more suitable naming
 -- TODO: the logic traverses the DB string twice
-alter :: TopLevelKey -> Entity -> DummyDB -> (DummyDB, Maybe Entity)
+alter :: TopLevelKey -> Entity -> DummyDB
+      -> (DummyDB, Either QueryError Entity)
 alter x ent (DummyDB db)
-    | isSingular (DummyDB db) x = (DummyDB newDB, newDB ^? key x)
-    | otherwise                 = (DummyDB db, Nothing)
-    where
-        newDB = db & key x %~ merge ent
+    | isSingular (DummyDB db) x = case select x (DummyDB db) of
+        (_, Left  err) -> (DummyDB db, Left err)
+        (_, Right old) -> update x (merge ent old) (DummyDB db)
+    | isPlural   (DummyDB db) x = (DummyDB db, Left KeyTypeMismatch)
+    | otherwise                 = (DummyDB db, Left NoSuchEntity)
 
 alterById :: TopLevelKey -> EntityId -> Entity -> DummyDB
           -> (DummyDB, Maybe Entity)

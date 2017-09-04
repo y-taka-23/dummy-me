@@ -175,21 +175,23 @@ spec = do
         -- TODO: add a test case for overwriting
         context "when the given key has a single Object entry" $ do
             it "should merge the entries, overwriting if necessary" $ do
-                let (newDB, Just entity) = alter "admin" adminEmail db
+                let (newDB, Right entity) = alter "admin" adminEmail db
                 newDB `shouldBe` altAdminDB
                 entity `shouldBe` adminAltered
---        context "when the given key has a single non-Object entry" $ do
---            it "should replace the entry with now one" $ do
---                alter "status"  statusString db
---                    `shouldBe` update "status" statusString db
---                alter "status"  statusObject db
---                    `shouldBe` update "status" statusObject db
+        context "when the given key has a single non-Object entry" $ do
+            it "should replace the entry with now one" $ do
+                alter "status"  statusString db
+                    `shouldBe` update "status" statusString db
+                alter "status"  statusObject db
+                    `shouldBe` update "status" statusObject db
         context "when the given key has an array of entries" $ do
-            it "should do nothing and return the original DB" $ do
-                alter "users" adminAltered db `shouldBe` (db, Nothing)
+            it "should return the original DB and KeyTypeMismatch" $ do
+                alter "users" adminAltered db
+                    `shouldBe` (db, Left KeyTypeMismatch)
         context "when the given key has no entry" $  do
-            it "should do nothing and return the original DB" $ do
-                alter "other" adminAltered db `shouldBe` (db, Nothing)
+            it "should return the original DB and NoSuchEntity" $ do
+                alter "other" adminAltered db
+                    `shouldBe` (db, Left NoSuchEntity)
 
     describe "alterById" $ do
         context "when the given key has an entry of the given id" $ do

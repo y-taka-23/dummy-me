@@ -99,15 +99,17 @@ deleteById x n (DummyDB db)
 purgeEntity :: EntityId -> V.Vector Entity -> V.Vector Entity
 purgeEntity n = V.filter (not . idIs n)
 
-insert :: TopLevelKey -> Entity -> DummyDB -> (DummyDB, Maybe Entity)
-insert x ent (DummyDB db) =
-    case nextId <$> db ^? key x . _Array of
-        Nothing -> (DummyDB db, Nothing)
+insert :: TopLevelKey -> Entity -> DummyDB
+       -> (DummyDB, Either QueryError Entity)
+insert x ent (DummyDB db)
+    | isSingular (DummyDB db) x = (DummyDB db, Left KeyTypeMismatch)
+    | isPlural   (DummyDB db) x = case nextId <$> db ^? key x . _Array of
+        Nothing    -> (DummyDB db, Left NoSuchEntity)
         Just newId ->
             let newEnt = setId newId ent
-            in  ( DummyDB $ db & key x . _Array %~ appendEntity newEnt
-                , Just newEnt
-                )
+                newDB  = db & key x . _Array %~ appendEntity newEnt
+            in  (DummyDB newDB, Right newEnt)
+    | otherwise                 = (DummyDB db, Left NoSuchEntity)
 
 appendEntity :: Entity -> V.Vector Entity -> V.Vector Entity
 appendEntity = flip V.snoc

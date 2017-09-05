@@ -78,10 +78,11 @@ postHandler :: (SpockState (ActionCtxT ctx m) ~ AppState,
 postHandler key = do
     entry <- jsonBody' -- returns 400 on parsing error
     dbRef <- inMemoryDB <$> getState
-    mInserted <- liftIO $ atomicModifyIORef' dbRef (insert key entry)
-    case mInserted of
-        Nothing -> errorHandler notFound404
-        Just ent -> do
+    eResult <- liftIO $ atomicModifyIORef' dbRef (insert key entry)
+    case eResult of
+        Left NoSuchEntity    -> errorHandler notFound404
+        Left KeyTypeMismatch -> errorHandler badRequest400
+        Right ent -> do
             setStatus created201
             setLocation key ent
             json ent

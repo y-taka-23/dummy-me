@@ -102,20 +102,20 @@ spec = do
     describe "insert" $ do
         context "even when the given entry has the 'id' key" $ do
             it "should ignore the original id of the entry" $ do
-                let (newDB, Just entry) = insert "users" carol db
+                let (newDB, Right entry) = insert "users" carol db
                 newDB `shouldBe` insCarolDB
                 entry ^? key "name" `shouldBe` carol ^? key "name"
         context "when the given entry doesn't have the 'id' key" $ do
             it "should number the entry automatically" $ do
-                let (newDB, Just entry) = insert "users" carolWithoutId db
+                let (newDB, Right entry) = insert "users" carolWithoutId db
                 newDB `shouldBe` insCarolDB
                 entry ^? key "name" `shouldBe` carol ^? key "name"
         context "when the gevin key has a non-array entry" $ do
-            it "should return a pair of the original DB and Nothing" $ do
-                insert "status" carol db `shouldBe` (db, Nothing)
+            it "should return a pair of the original DB and KeyTypeMismatch" $ do
+                insert "status" carol db `shouldBe` (db, Left KeyTypeMismatch)
         context "when the given key has no entry" $ do
-            it "should return a pair of the original DB and Nothing" $ do
-                insert "other" carol db `shouldBe` (db, Nothing)
+            it "should return a pair of the original DB and NoSuchEntity" $ do
+                insert "other" carol db `shouldBe` (db, Left NoSuchEntity)
 
     describe "update" $ do
         context "when the given key has a non-array entry" $ do

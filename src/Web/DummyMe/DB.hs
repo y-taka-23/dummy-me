@@ -174,15 +174,13 @@ alter x ent (DummyDB db)
     | otherwise                 = (DummyDB db, Left NoSuchEntity)
 
 alterById :: TopLevelKey -> EntityId -> Entity -> DummyDB
-          -> (DummyDB, Maybe Entity)
+          -> (DummyDB, Either QueryError Entity)
 alterById x n ent (DummyDB db)
-    | DummyDB newDB == DummyDB db = (DummyDB db, Nothing)
-    | otherwise = (DummyDB newDB, mNewEnt)
-    where
-        newDB   = db & key x . _Array %~ mergeById n ent
-        mNewEnt = case selectById x n (DummyDB newDB) of
-            (_, Left _)    -> Nothing
-            (_, Right ent) -> Just ent
+    | isSingular (DummyDB db) x = (DummyDB db, Left KeyTypeMismatch)
+    | isPlural   (DummyDB db) x = case selectById x n (DummyDB db) of
+        (_, Left  err) -> (DummyDB db, Left err)
+        (_, Right old) -> updateById x n (merge ent old) (DummyDB db)
+    | otherwise                 = (DummyDB db, Left NoSuchEntity)
 
 merge :: Entity -> Entity -> Entity
 merge (Object o1) (Object o2) = Object $ HM.union o1 o2

@@ -18,6 +18,7 @@ module Web.DummyMe.Handler (
 
 import Web.DummyMe.Config
 import Web.DummyMe.DB
+import Web.DummyMe.Response
 
 import           Control.Monad.IO.Class
 import           Data.IORef
@@ -135,9 +136,8 @@ patchByIdHandler key id = do
         Left KeyTypeMismatch -> errorHandler badRequest400
         Right _              -> setStatus noContent204
 
--- TODO: create JSON templates for each status
 errorHandler :: (MonadIO m) => Status -> ActionCtxT ctx m b
-errorHandler status = setStatus status >> json ""
+errorHandler status = setStatus status >> json (renderStatus status)
 
 -- TODO: better way of building the URI
 formatLocation :: T.Text -> TopLevelKey -> EntityId -> T.Text

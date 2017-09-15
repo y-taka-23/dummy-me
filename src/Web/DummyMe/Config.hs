@@ -55,7 +55,7 @@ snapshotsP = option str $ mconcat [
 versionP :: Parser Bool
 versionP = switch $ mconcat [
       long "version"
-    , help "Shows the version information"
+    , help "Show the version information"
     ]
 
 configP :: Parser Config

@@ -108,6 +108,25 @@ GET    /_db        # returns the whole current data in database
 POST   /_snapshot  # dumps the data as a JSON file
 ```
 
+CLI Options
+-----------
+
+```console
+Usage: dummy-me [-f|--file string] [-p|--port int] [--quiet]
+                [--snapshots string] [--version]
+  A simple dummy server for REST APIs
+
+Available options:
+  -h,--help                Show this help text
+  -f,--file string         JSON file which prescribes the initial
+                           data (default: "db.json")
+  -p,--port int            Port for the REST endpoints (default: 8080)
+  --quiet                  Suppress log messages
+  --snapshots string       Directory to store the database
+                           snapshots (default: ".")
+  --version                Show the version information
+```
+
 License
 -------
 

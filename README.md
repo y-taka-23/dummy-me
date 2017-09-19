@@ -84,6 +84,9 @@ Now it's time to utilize DummyMe for creating your awesome web application. Enjo
 
 #### Plural routes
 
+Arrays in `db.json` correspond to plural routes,
+which support the following endpoints/verbs.
+
 ```
 GET    /todos
 GET    /todos/1

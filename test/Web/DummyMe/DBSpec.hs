@@ -161,7 +161,7 @@ spec = do
                 entry ^? key "name" `shouldBe` carol ^? key "name"
         context "when the give key has no entry of the given id" $ do
             it "should return a pair of the original DB and NoSuchEntity" $ do
-                deleteById "users" 3 db `shouldBe` (db, Left NoSuchEntity)
+                updateById "users" 3 carol db `shouldBe` (db, Left NoSuchEntity)
         context "when the given key has a non-array entry" $ do
             it "should return the original DB and KeyTypeMismatch" $ do
                 updateById "status" 1 statusString db

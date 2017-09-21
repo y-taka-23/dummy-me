@@ -7,6 +7,7 @@ import Options.Applicative
 
 data Config = Config {
       file      :: FilePath
+    , ident     :: String
     , port      :: Int
     , quiet     :: Bool
     , snapshots :: FilePath
@@ -22,6 +23,15 @@ fileP = option str $ mconcat [
     , long "file"
     , value "db.json"
     , help "JSON file which prescribes the initial data"
+    , metavar "string"
+    , showDefault
+    ]
+
+identP :: Parser String
+identP = option str $ mconcat [
+      long "id"
+    , value "id"
+    , help "Identifier for records in the database"
     , metavar "string"
     , showDefault
     ]
@@ -62,6 +72,7 @@ configP :: Parser Config
 configP = helper <*> (
         Config
     <$> fileP
+    <*> identP
     <*> portP
     <*> quietP
     <*> snapshotsP

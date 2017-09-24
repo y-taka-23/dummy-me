@@ -17,7 +17,7 @@ data Config = Config {
 getConfig :: IO Config
 getConfig = customExecParser (prefs showHelpOnError) configParserInfo
 
-fileP :: Parser String
+fileP :: Parser FilePath
 fileP = option str $ mconcat [
       short 'f'
     , long "file"
@@ -52,7 +52,7 @@ quietP = switch $ mconcat [
     , help "Suppress log messages"
     ]
 
-snapshotsP :: Parser String
+snapshotsP :: Parser FilePath
 snapshotsP = option str $ mconcat [
       long "snapshots"
     , value "."

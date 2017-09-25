@@ -85,17 +85,17 @@ spec = do
     describe "deleteById" $ do
         context "when the given key has an entry of the given id" $ do
             it "should return a pair of the new DB and the deleted entry" $ do
-                deleteById "users" 1 db `shouldBe` (delAliceDB, Right alice)
-                deleteById "users" 2 db `shouldBe` (delBobDB, Right bob)
+                deleteById "id" "users" 1 db `shouldBe` (delAliceDB, Right alice)
+                deleteById "id" "users" 2 db `shouldBe` (delBobDB, Right bob)
         context "when the give key has no entry of the given id" $ do
             it "should return a pair of the original db and NoSuchEntity" $ do
-                deleteById "users" 3 db `shouldBe` (db, Left NoSuchEntity)
+                deleteById "id" "users" 3 db `shouldBe` (db, Left NoSuchEntity)
         context "when the given key has a non-array entry" $ do
             it "should return a pair of the original DB and KeyTypeMismatch" $ do
-                deleteById "status" 1 db `shouldBe` (db, Left KeyTypeMismatch)
+                deleteById "id" "status" 1 db `shouldBe` (db, Left KeyTypeMismatch)
         context "when the given key has no entry" $ do
             it "should return a pair of the original DB and NoSuchEntity" $ do
-                deleteById "other" 1 db `shouldBe` (db, Left NoSuchEntity)
+                deleteById "id" "other" 1 db `shouldBe` (db, Left NoSuchEntity)
 
     -- TODO: these test cases are fragile, i.e. depend on the numbering logic
     -- TODO: check that the numbering has no duplication
@@ -141,23 +141,23 @@ spec = do
             it "should ignore the original id of the entry" $ do
                 let (newDB, Right entry) = updateById "users" 1 carol db
                 newDB `shouldBe` updAliceDB
-                idOf entry `shouldBe` Just 1
+                idOf "id" entry `shouldBe` Just 1
                 entry ^? key "name" `shouldBe` carol ^? key "name"
             it "should ignore the original id of the entry" $ do
                 let (newDB, Right entry) = updateById "users" 2 carol db
                 newDB `shouldBe` updBobDB
-                idOf entry `shouldBe` Just 2
+                idOf "id" entry `shouldBe` Just 2
                 entry ^? key "name" `shouldBe` carol ^? key "name"
         context "when the given entry doesn't have the 'id' key" $ do
             it "should update the entry by the specified id" $ do
                 let (newDB, Right entry) = updateById "users" 1 carolWithoutId db
                 newDB `shouldBe` updAliceDB
-                idOf entry `shouldBe` Just 1
+                idOf "id" entry `shouldBe` Just 1
                 entry ^? key "name" `shouldBe` carol ^? key "name"
             it "should update the entry by the specified id" $ do
                 let (newDB, Right entry) = updateById "users" 2 carolWithoutId db
                 newDB `shouldBe` updBobDB
-                idOf entry `shouldBe` Just 2
+                idOf "id" entry `shouldBe` Just 2
                 entry ^? key "name" `shouldBe` carol ^? key "name"
         context "when the give key has no entry of the given id" $ do
             it "should return a pair of the original DB and NoSuchEntity" $ do
@@ -198,7 +198,7 @@ spec = do
             it "should update the entry partially" $ do
                 let (newDB, Right entry) = alterById "users" 1 adminEmail db
                 newDB `shouldBe` altAliceDB
-                idOf entry `shouldBe` Just 1
+                idOf "id" entry `shouldBe` Just 1
                 entry ^? key "name" `shouldBe` alice ^? key "name"
                 entry ^? key "email" `shouldBe` adminEmail ^? key "email"
         context "when 'id' is specified in the given entry" $ do
@@ -221,8 +221,8 @@ spec = do
     describe "idOf" $ do
         context "when the given entry has the 'id' field" $ do
             it "should return the value" $ do
-                idOf alice `shouldBe` Just 1
-                idOf bob `shouldBe` Just 2
+                idOf "id" alice `shouldBe` Just 1
+                idOf "id" bob `shouldBe` Just 2
         context "when the given entry doesn't have the 'id' field" $ do
             it "should return Nothing" $ do
-                idOf carolWithoutId `shouldBe` Nothing
+                idOf "id" carolWithoutId `shouldBe` Nothing

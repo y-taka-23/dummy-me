@@ -64,10 +64,10 @@ getByIdHandler key id = do
 
 deleteByIdHandler :: (SpockState (ActionCtxT ctx m) ~ AppState,
                       HasSpock (ActionCtxT ctx m), MonadIO m) =>
-                  TopLevelKey -> EntityId -> ActionCtxT ctx m ()
-deleteByIdHandler key id = do
+                  Identifier -> TopLevelKey -> EntityId -> ActionCtxT ctx m ()
+deleteByIdHandler ident key id = do
     dbRef <- inMemoryDB <$> getState
-    eResult <- liftIO $ atomicModifyIORef' dbRef (deleteById key id)
+    eResult <- liftIO $ atomicModifyIORef' dbRef (deleteById ident key id)
     case eResult of
         Left NoSuchEntity    -> errorHandler notFound404
         Left KeyTypeMismatch -> errorHandler badRequest400
@@ -149,7 +149,7 @@ formatLocation host key id = T.concat [
 setLocation :: MonadIO m => TopLevelKey -> Entity -> ActionCtxT ctx m ()
 setLocation key ent = do
     mHost <- header (T.pack "Host")
-    case (mHost, idOf ent) of
+    case (mHost, idOf (T.pack "id") ent) of
         (Just host, Just id) -> do
             setHeader (T.pack "Location") (formatLocation host key id)
         (_, _) -> error "unreachable"

@@ -3,6 +3,7 @@ module Web.DummyMe.DB (
     , TopLevelKey(..)
     , EntityId(..)
     , Entity(..)
+    , Identifier(..)
     , KeySet(..)
     , QueryError(..)
     , loadDummyDB
@@ -35,6 +36,7 @@ newtype DummyDB = DummyDB BS.ByteString deriving ( Show )
 type TopLevelKey = T.Text
 type EntityId = Integer
 type Entity = Value
+type Identifier = T.Text
 
 instance Eq DummyDB where
     (==) (DummyDB x) (DummyDB y) =
@@ -85,19 +87,19 @@ selectById x n (DummyDB db)
             Just ent -> (DummyDB db, Right ent)
     | otherwise                 = (DummyDB db, Left NoSuchEntity)
 
-deleteById :: TopLevelKey -> EntityId -> DummyDB
+deleteById :: Identifier -> TopLevelKey -> EntityId -> DummyDB
            -> (DummyDB, Either QueryError Entity)
-deleteById x n (DummyDB db)
+deleteById ident x n (DummyDB db)
     | isSingular (DummyDB db) x = (DummyDB db, Left KeyTypeMismatch)
     | isPlural   (DummyDB db) x = case selectById x n (DummyDB db) of
         (_, Left NoSuchEntity)    -> (DummyDB db, Left NoSuchEntity)
         (_, Left KeyTypeMismatch) -> (DummyDB db, Left KeyTypeMismatch)
         (_, Right ent )           -> (DummyDB newDB, Right ent)
-            where newDB = db & key x . _Array %~ purgeEntity n
+            where newDB = db & key x . _Array %~ purgeEntity ident n
     | otherwise                 = (DummyDB db, Left NoSuchEntity)
 
-purgeEntity :: EntityId -> V.Vector Entity -> V.Vector Entity
-purgeEntity n = V.filter (not . idIs n)
+purgeEntity :: Identifier -> EntityId -> V.Vector Entity -> V.Vector Entity
+purgeEntity ident n = V.filter $ not . (ident `is` n)
 
 insert :: TopLevelKey -> Entity -> DummyDB
        -> (DummyDB, Either QueryError Entity)
@@ -194,8 +196,11 @@ mergeById n ent currents =
             where
                 merged = setId n $ merge ent (currents V.! idx)
 
-idOf :: Entity -> Maybe EntityId
-idOf ent = ent ^? key (T.pack "id") . _Integer
+idOf :: Identifier -> Entity -> Maybe EntityId
+idOf ident ent = ent ^? key ident . _Integer
+
+is :: Identifier -> EntityId -> Entity -> Bool
+is ident n ent = idOf ident ent == Just n
 
 idIs :: EntityId -> Entity -> Bool
-idIs n ent = idOf ent == Just n
+idIs n ent = idOf (T.pack "id") ent == Just n

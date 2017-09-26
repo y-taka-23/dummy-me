@@ -53,11 +53,11 @@ getHandler key = do
 
 getByIdHandler :: (SpockState (ActionCtxT ctx m) ~ AppState,
                    HasSpock (ActionCtxT ctx m), MonadIO m) =>
-               TopLevelKey -> EntityId -> ActionCtxT ctx m b
-getByIdHandler key id = do
+               Identifier -> TopLevelKey -> EntityId -> ActionCtxT ctx m b
+getByIdHandler ident key id = do
     dbRef <- inMemoryDB <$> getState
     db <- liftIO $ readIORef dbRef
-    case selectById key id db of
+    case selectById ident key id db of
         (_, Left NoSuchEntity)    -> errorHandler notFound404
         (_, Left KeyTypeMismatch) -> errorHandler badRequest400
         (_, Right ent)            -> json ent

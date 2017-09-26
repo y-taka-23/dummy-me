@@ -70,17 +70,17 @@ spec = do
     describe "selectById" $ do
         context "when the given key has an entry of the given id" $ do
             it "should return the single specified entry" $ do
-                selectById "users" 1 db `shouldBe` (db, Right alice)
-                selectById "users" 2 db `shouldBe` (db, Right bob)
+                selectById "id" "users" 1 db `shouldBe` (db, Right alice)
+                selectById "id" "users" 2 db `shouldBe` (db, Right bob)
         context "when the given key has no entry of the given id" $ do
             it "should return NoSuchEntity" $ do
-                selectById "users" 3 db `shouldBe` (db, Left NoSuchEntity)
+                selectById "id" "users" 3 db `shouldBe` (db, Left NoSuchEntity)
         context "when the given key has a non-array entry" $ do
             it "should return KeyTypeMismatch" $ do
-                selectById "status" 1 db `shouldBe` (db, Left KeyTypeMismatch)
+                selectById "id" "status" 1 db `shouldBe` (db, Left KeyTypeMismatch)
         context "when the given key has no entry" $ do
             it "should return NoSuchEntity" $ do
-                selectById "other" 1 db `shouldBe` (db, Left NoSuchEntity)
+                selectById "id" "other" 1 db `shouldBe` (db, Left NoSuchEntity)
 
     describe "deleteById" $ do
         context "when the given key has an entry of the given id" $ do

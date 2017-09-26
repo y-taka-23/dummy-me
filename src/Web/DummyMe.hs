@@ -46,7 +46,7 @@ routes = do
     get    "_db"                       getDBHandler
     post   "_snapshot"                 postSnapshotHandler
     get     var           $ \key    -> getHandler key
-    get    (var <//> var) $ \key id -> getByIdHandler key id
+    get    (var <//> var) $ \key id -> getByIdHandler "id" key id
     delete (var <//> var) $ \key id -> deleteByIdHandler "id" key id
     post    var           $ \key    -> postHandler key
     put     var           $ \key    -> putHandler key

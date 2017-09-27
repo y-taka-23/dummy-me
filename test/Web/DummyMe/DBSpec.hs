@@ -139,36 +139,36 @@ spec = do
     describe "updateById" $ do
         context "even when the given entry has the 'id' field" $ do
             it "should ignore the original id of the entry" $ do
-                let (newDB, Right entry) = updateById "users" 1 carol db
+                let (newDB, Right entry) = updateById "id" "users" 1 carol db
                 newDB `shouldBe` updAliceDB
                 idOf "id" entry `shouldBe` Just 1
                 entry ^? key "name" `shouldBe` carol ^? key "name"
             it "should ignore the original id of the entry" $ do
-                let (newDB, Right entry) = updateById "users" 2 carol db
+                let (newDB, Right entry) = updateById "id" "users" 2 carol db
                 newDB `shouldBe` updBobDB
                 idOf "id" entry `shouldBe` Just 2
                 entry ^? key "name" `shouldBe` carol ^? key "name"
         context "when the given entry doesn't have the 'id' key" $ do
             it "should update the entry by the specified id" $ do
-                let (newDB, Right entry) = updateById "users" 1 carolWithoutId db
+                let (newDB, Right entry) = updateById "id" "users" 1 carolWithoutId db
                 newDB `shouldBe` updAliceDB
                 idOf "id" entry `shouldBe` Just 1
                 entry ^? key "name" `shouldBe` carol ^? key "name"
             it "should update the entry by the specified id" $ do
-                let (newDB, Right entry) = updateById "users" 2 carolWithoutId db
+                let (newDB, Right entry) = updateById "id" "users" 2 carolWithoutId db
                 newDB `shouldBe` updBobDB
                 idOf "id" entry `shouldBe` Just 2
                 entry ^? key "name" `shouldBe` carol ^? key "name"
         context "when the give key has no entry of the given id" $ do
             it "should return a pair of the original DB and NoSuchEntity" $ do
-                updateById "users" 3 carol db `shouldBe` (db, Left NoSuchEntity)
+                updateById "id" "users" 3 carol db `shouldBe` (db, Left NoSuchEntity)
         context "when the given key has a non-array entry" $ do
             it "should return the original DB and KeyTypeMismatch" $ do
-                updateById "status" 1 statusString db
+                updateById "id" "status" 1 statusString db
                     `shouldBe` (db, Left KeyTypeMismatch)
         context "when the given key has no entry" $ do
             it "should return the original DB and NoSuchEntity" $ do
-                updateById "other" 1 statusString db
+                updateById "id" "other" 1 statusString db
                     `shouldBe` (db, Left NoSuchEntity)
 
     describe "alter" $ do
@@ -204,7 +204,7 @@ spec = do
         context "when 'id' is specified in the given entry" $ do
             it "should ignore the 'id' and keep the original one" $ do
                 alterById "users" 1 carol db
-                    `shouldBe` updateById "users" 1 carol db
+                    `shouldBe` updateById "id" "users" 1 carol db
         context "when there is no entry of the given id" $ do
             it "should return the original DB and NoSuchEntity" $ do
                 alterById "users" 3 adminEmail db

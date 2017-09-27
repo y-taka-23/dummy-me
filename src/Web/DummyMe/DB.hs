@@ -108,7 +108,7 @@ insert x ent (DummyDB db)
     | isPlural   (DummyDB db) x = case nextId <$> db ^? key x . _Array of
         Nothing    -> (DummyDB db, Left NoSuchEntity)
         Just newId ->
-            let newEnt = setId newId ent
+            let newEnt = setId (T.pack "id") newId ent
                 newDB  = db & key x . _Array %~ appendEntity newEnt
             in  (DummyDB newDB, Right newEnt)
     | otherwise                 = (DummyDB db, Left NoSuchEntity)
@@ -116,9 +116,9 @@ insert x ent (DummyDB db)
 appendEntity :: Entity -> V.Vector Entity -> V.Vector Entity
 appendEntity = flip V.snoc
 
-setId :: EntityId -> Entity -> Entity
-setId n (Object obj) = Object $ HM.insert (T.pack "id") (toJSON n) obj
-setId _ ent          = ent
+setId :: Identifier -> EntityId -> Entity -> Entity
+setId ident n (Object obj) = Object $ HM.insert ident (toJSON n) obj
+setId _     _ ent          = ent
 
 nextId :: V.Vector Entity -> EntityId
 nextId currents =
@@ -146,15 +146,15 @@ isPlural (DummyDB db) x = case db ^? key x of
     Just (Array _) -> True
     _              -> False
 
-updateById :: TopLevelKey -> EntityId -> Entity -> DummyDB
+updateById :: Identifier -> TopLevelKey -> EntityId -> Entity -> DummyDB
            -> (DummyDB, Either QueryError Entity)
-updateById x n ent (DummyDB db)
+updateById ident x n ent (DummyDB db)
     | isSingular (DummyDB db) x = (DummyDB db, Left KeyTypeMismatch)
-    | isPlural   (DummyDB db) x = case selectById (T.pack "id") x n (DummyDB db) of
+    | isPlural   (DummyDB db) x = case selectById ident x n (DummyDB db) of
         (_, Left err) -> (DummyDB db, Left err)
         (_, Right _)  -> (DummyDB newDB, Right newEnt)
             where
-                newEnt = setId n ent
+                newEnt = setId ident n ent
                 newDB  = db & key x . _Array %~ modifyEntity n newEnt
     | otherwise                 = (DummyDB db, Left NoSuchEntity)
 
@@ -181,7 +181,7 @@ alterById x n ent (DummyDB db)
     | isSingular (DummyDB db) x = (DummyDB db, Left KeyTypeMismatch)
     | isPlural   (DummyDB db) x = case selectById (T.pack "id") x n (DummyDB db) of
         (_, Left  err) -> (DummyDB db, Left err)
-        (_, Right old) -> updateById x n (merge ent old) (DummyDB db)
+        (_, Right old) -> updateById (T.pack "id") x n (merge ent old) (DummyDB db)
     | otherwise                 = (DummyDB db, Left NoSuchEntity)
 
 merge :: Entity -> Entity -> Entity
@@ -194,7 +194,7 @@ mergeById n ent currents =
         Nothing -> currents
         Just idx -> currents V.// [(idx, merged)]
             where
-                merged = setId n $ merge ent (currents V.! idx)
+                merged = setId (T.pack "id") n $ merge ent (currents V.! idx)
 
 idOf :: Identifier -> Entity -> Maybe EntityId
 idOf ident ent = ent ^? key ident . _Integer

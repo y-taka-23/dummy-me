@@ -102,11 +102,12 @@ putHandler key = do
 
 putByIdHandler :: (SpockState (ActionCtxT ctx m) ~ AppState,
                    HasSpock (ActionCtxT ctx m), MonadIO m) =>
-               TopLevelKey -> EntityId -> ActionCtxT ctx m ()
-putByIdHandler key id = do
+               Identifier -> TopLevelKey -> EntityId -> ActionCtxT ctx m ()
+putByIdHandler ident key id = do
     entry <- jsonBody' -- returns 400 on parsing error
     dbRef <- inMemoryDB <$> getState
-    eResult <- liftIO $ atomicModifyIORef' dbRef (updateById key id entry)
+    eResult <- liftIO $
+        atomicModifyIORef' dbRef (updateById ident key id entry)
     case eResult of
         Left NoSuchEntity    -> errorHandler notFound404
         Left KeyTypeMismatch -> errorHandler badRequest400

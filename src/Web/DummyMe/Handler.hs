@@ -127,11 +127,11 @@ patchHandler key = do
 
 patchByIdHandler :: (SpockState (ActionCtxT ctx m) ~ AppState,
                    HasSpock (ActionCtxT ctx m), MonadIO m) =>
-               TopLevelKey -> EntityId -> ActionCtxT ctx m ()
-patchByIdHandler key id = do
+               Identifier -> TopLevelKey -> EntityId -> ActionCtxT ctx m ()
+patchByIdHandler ident key id = do
     entry <- jsonBody' -- returns 400 on parsing error
     dbRef <- inMemoryDB <$> getState
-    eResult <- liftIO $ atomicModifyIORef' dbRef (alterById key id entry)
+    eResult <- liftIO $ atomicModifyIORef' dbRef (alterById ident key id entry)
     case eResult of
         Left NoSuchEntity    -> errorHandler notFound404
         Left KeyTypeMismatch -> errorHandler badRequest400

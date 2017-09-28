@@ -175,13 +175,13 @@ alter x ent (DummyDB db)
     | isPlural   (DummyDB db) x = (DummyDB db, Left KeyTypeMismatch)
     | otherwise                 = (DummyDB db, Left NoSuchEntity)
 
-alterById :: TopLevelKey -> EntityId -> Entity -> DummyDB
+alterById :: Identifier -> TopLevelKey -> EntityId -> Entity -> DummyDB
           -> (DummyDB, Either QueryError Entity)
-alterById x n ent (DummyDB db)
+alterById ident x n ent (DummyDB db)
     | isSingular (DummyDB db) x = (DummyDB db, Left KeyTypeMismatch)
-    | isPlural   (DummyDB db) x = case selectById (T.pack "id") x n (DummyDB db) of
+    | isPlural   (DummyDB db) x = case selectById ident x n (DummyDB db) of
         (_, Left  err) -> (DummyDB db, Left err)
-        (_, Right old) -> updateById (T.pack "id") x n (merge ent old) (DummyDB db)
+        (_, Right old) -> updateById ident x n (merge ent old) (DummyDB db)
     | otherwise                 = (DummyDB db, Left NoSuchEntity)
 
 merge :: Entity -> Entity -> Entity

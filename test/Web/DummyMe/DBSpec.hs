@@ -196,26 +196,26 @@ spec = do
     describe "alterById" $ do
         context "when the given key has an entry of the given id" $ do
             it "should update the entry partially" $ do
-                let (newDB, Right entry) = alterById "users" 1 adminEmail db
+                let (newDB, Right entry) = alterById "id" "users" 1 adminEmail db
                 newDB `shouldBe` altAliceDB
                 idOf "id" entry `shouldBe` Just 1
                 entry ^? key "name" `shouldBe` alice ^? key "name"
                 entry ^? key "email" `shouldBe` adminEmail ^? key "email"
         context "when 'id' is specified in the given entry" $ do
             it "should ignore the 'id' and keep the original one" $ do
-                alterById "users" 1 carol db
+                alterById "id" "users" 1 carol db
                     `shouldBe` updateById "id" "users" 1 carol db
         context "when there is no entry of the given id" $ do
             it "should return the original DB and NoSuchEntity" $ do
-                alterById "users" 3 adminEmail db
+                alterById "id""users" 3 adminEmail db
                     `shouldBe` (db, Left NoSuchEntity)
         context "when the given key has non-array enttry" $ do
             it "should return the original DB and KeyTypeMismatch" $ do
-                alterById "status" 1 statusString db
+                alterById "id""status" 1 statusString db
                     `shouldBe` (db, Left KeyTypeMismatch)
         context "when the given key has no entry" $ do
             it "should return the original DB and NoSuchEntity" $ do
-                alterById "other" 1 statusString db
+                alterById "id""other" 1 statusString db
                     `shouldBe` (db, Left NoSuchEntity)
 
     describe "idOf" $ do

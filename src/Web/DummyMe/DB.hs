@@ -101,14 +101,14 @@ deleteById ident x n (DummyDB db)
 purgeEntity :: Identifier -> EntityId -> V.Vector Entity -> V.Vector Entity
 purgeEntity ident n = V.filter $ not . (ident `is` n)
 
-insert :: TopLevelKey -> Entity -> DummyDB
+insert :: Identifier -> TopLevelKey -> Entity -> DummyDB
        -> (DummyDB, Either QueryError Entity)
-insert x ent (DummyDB db)
+insert ident x ent (DummyDB db)
     | isSingular (DummyDB db) x = (DummyDB db, Left KeyTypeMismatch)
-    | isPlural   (DummyDB db) x = case nextId <$> db ^? key x . _Array of
+    | isPlural   (DummyDB db) x = case nextId ident <$> db ^? key x . _Array of
         Nothing    -> (DummyDB db, Left NoSuchEntity)
         Just newId ->
-            let newEnt = setId (T.pack "id") newId ent
+            let newEnt = setId ident newId ent
                 newDB  = db & key x . _Array %~ appendEntity newEnt
             in  (DummyDB newDB, Right newEnt)
     | otherwise                 = (DummyDB db, Left NoSuchEntity)
@@ -120,9 +120,9 @@ setId :: Identifier -> EntityId -> Entity -> Entity
 setId ident n (Object obj) = Object $ HM.insert ident (toJSON n) obj
 setId _     _ ent          = ent
 
-nextId :: V.Vector Entity -> EntityId
-nextId currents =
-    case maximumOf (traverse . key (T.pack "id") . _Number) currents of
+nextId :: Identifier -> V.Vector Entity -> EntityId
+nextId ident currents =
+    case maximumOf (traverse . key ident . _Number) currents of
         Nothing -> 1
         Just sci -> case SCI.floatingOrInteger sci of
             Left _  -> 1

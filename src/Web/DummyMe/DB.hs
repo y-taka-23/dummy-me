@@ -91,7 +91,7 @@ deleteById :: Identifier -> TopLevelKey -> EntityId -> DummyDB
            -> (DummyDB, Either QueryError Entity)
 deleteById ident x n (DummyDB db)
     | isSingular (DummyDB db) x = (DummyDB db, Left KeyTypeMismatch)
-    | isPlural   (DummyDB db) x = case selectById (T.pack "id") x n (DummyDB db) of
+    | isPlural   (DummyDB db) x = case selectById ident x n (DummyDB db) of
         (_, Left NoSuchEntity)    -> (DummyDB db, Left NoSuchEntity)
         (_, Left KeyTypeMismatch) -> (DummyDB db, Left KeyTypeMismatch)
         (_, Right ent )           -> (DummyDB newDB, Right ent)
@@ -155,12 +155,13 @@ updateById ident x n ent (DummyDB db)
         (_, Right _)  -> (DummyDB newDB, Right newEnt)
             where
                 newEnt = setId ident n ent
-                newDB  = db & key x . _Array %~ modifyEntity n newEnt
+                newDB  = db & key x . _Array %~ modifyEntity ident n newEnt
     | otherwise                 = (DummyDB db, Left NoSuchEntity)
 
-modifyEntity :: EntityId -> Entity -> V.Vector Entity -> V.Vector Entity
-modifyEntity n ent currents =
-    case V.findIndex (idIs n) currents of
+modifyEntity :: Identifier -> EntityId -> Entity -> V.Vector Entity
+             -> V.Vector Entity
+modifyEntity ident n ent currents =
+    case V.findIndex (ident `is` n) currents of
         Nothing  -> currents
         Just idx -> currents V.// [(idx, ent)]
 
@@ -188,19 +189,8 @@ merge :: Entity -> Entity -> Entity
 merge (Object o1) (Object o2) = Object $ HM.union o1 o2
 merge ent         _           = ent
 
-mergeById :: EntityId -> Entity -> V.Vector Entity -> V.Vector Entity
-mergeById n ent currents =
-    case V.findIndex (idIs n) currents of
-        Nothing -> currents
-        Just idx -> currents V.// [(idx, merged)]
-            where
-                merged = setId (T.pack "id") n $ merge ent (currents V.! idx)
-
 idOf :: Identifier -> Entity -> Maybe EntityId
 idOf ident ent = ent ^? key ident . _Integer
 
 is :: Identifier -> EntityId -> Entity -> Bool
 is ident n ent = idOf ident ent == Just n
-
-idIs :: EntityId -> Entity -> Bool
-idIs n ent = idOf (T.pack "id") ent == Just n

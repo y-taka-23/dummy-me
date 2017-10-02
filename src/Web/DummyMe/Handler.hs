@@ -66,10 +66,12 @@ getByIdHandler key id = do
 
 deleteByIdHandler :: (SpockState (ActionCtxT ctx m) ~ AppState,
                       HasSpock (ActionCtxT ctx m), MonadIO m) =>
-                  Identifier -> TopLevelKey -> EntityId -> ActionCtxT ctx m ()
-deleteByIdHandler ident key id = do
-    dbRef <- inMemoryDB <$> getState
-    eResult <- liftIO $ atomicModifyIORef' dbRef (deleteById ident key id)
+                  TopLevelKey -> EntityId -> ActionCtxT ctx m ()
+deleteByIdHandler key id = do
+    appState <- getState
+    let dbRef = inMemoryDB getState
+        i     = T.pack . ident . config $ appState
+    eResult <- liftIO $ atomicModifyIORef' dbRef (deleteById i key id)
     case eResult of
         Left NoSuchEntity    -> errorHandler notFound404
         Left KeyTypeMismatch -> errorHandler badRequest400

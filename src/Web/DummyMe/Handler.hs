@@ -69,7 +69,7 @@ deleteByIdHandler :: (SpockState (ActionCtxT ctx m) ~ AppState,
                   TopLevelKey -> EntityId -> ActionCtxT ctx m ()
 deleteByIdHandler key id = do
     appState <- getState
-    let dbRef = inMemoryDB getState
+    let dbRef = inMemoryDB appState
         i     = T.pack . ident . config $ appState
     eResult <- liftIO $ atomicModifyIORef' dbRef (deleteById i key id)
     case eResult of

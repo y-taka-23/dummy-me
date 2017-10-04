@@ -79,11 +79,13 @@ deleteByIdHandler key id = do
 
 postHandler :: (SpockState (ActionCtxT ctx m) ~ AppState,
                 HasSpock (ActionCtxT ctx m), MonadIO m) =>
-            Identifier -> TopLevelKey -> ActionCtxT ctx m b
-postHandler ident key = do
+            TopLevelKey -> ActionCtxT ctx m b
+postHandler key = do
     entry <- jsonBody' -- returns 400 on parsing error
-    dbRef <- inMemoryDB <$> getState
-    eResult <- liftIO $ atomicModifyIORef' dbRef (insert ident key entry)
+    appState <- getState
+    let dbRef = inMemoryDB appState
+        i     = T.pack . ident . config $ appState
+    eResult <- liftIO $ atomicModifyIORef' dbRef (insert i key entry)
     case eResult of
         Left NoSuchEntity    -> errorHandler notFound404
         Left KeyTypeMismatch -> errorHandler badRequest400

@@ -50,7 +50,7 @@ routes = do
     delete (var <//> var) $ \key id -> deleteByIdHandler key id
     post    var           $ \key    -> postHandler key
     put     var           $ \key    -> putHandler key
-    put    (var <//> var) $ \key id -> putByIdHandler "id" key id
+    put    (var <//> var) $ \key id -> putByIdHandler key id
     patch   var           $ \key    -> patchHandler key
     patch  (var <//> var) $ \key id -> patchByIdHandler "id" key id
 

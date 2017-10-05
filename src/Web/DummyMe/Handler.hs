@@ -112,7 +112,7 @@ putByIdHandler :: (SpockState (ActionCtxT ctx m) ~ AppState,
 putByIdHandler key id = do
     entry <- jsonBody' -- returns 400 on parsing error
     appState <- getState
-    let dbRef <- inMemoryDB appState
+    let dbRef = inMemoryDB appState
         i     = T.pack . ident . config $ appState
     eResult <- liftIO $
         atomicModifyIORef' dbRef (updateById i key id entry)

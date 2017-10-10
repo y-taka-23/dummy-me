@@ -50,6 +50,10 @@ data KeySet = KeySet {
     , singularKeys :: HS.HashSet TopLevelKey
     }
 
+data QueryOption = QueryOption {
+      qoFilter :: [(Identifier, Entity)]
+    }
+
 data QueryError =
       NoSuchEntity
     | KeyTypeMismatch

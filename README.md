@@ -123,6 +123,8 @@ Available options:
   -h,--help                Show this help text
   -f,--file string         JSON file which prescribes the initial
                            data (default: "db.json")
+  --id string              Identifier for records in the
+                           database (default: "id")
   -p,--port int            Port for the REST endpoints (default: 8080)
   --quiet                  Suppress log messages
   --snapshots string       Directory to store the database
